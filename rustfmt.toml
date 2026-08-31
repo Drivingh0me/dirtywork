@@ -1,0 +1,7 @@
+max_width = 80
+
+edition = "2024"
+
+indent_style = "Block"
+
+reorder_imnports = false

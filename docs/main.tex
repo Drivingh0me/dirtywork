@@ -1,0 +1,64 @@
+% Main Preamble
+
+\documentclass[12pt, letterpaper]{article}
+\title{Nucleofile Manual\\[0.12in] \large Version 0.1.1}
+\author{Caleb Griffin}
+\date{June, 2026}
+
+\usepackage{
+	xcolor, 
+	graphicx, 
+	titlesec, 
+	geometry, 
+	listings, 
+	amsmath,
+	hyperref
+}
+\geometry{bottom=1.0in}
+
+\pagecolor{white}
+
+\hypersetup{
+	colorlinks=true,
+	linkcolor=black,
+	filecolor=magenta,
+	urlcolor=blue
+}
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+
+\pagebreak
+\tableofcontents
+\pagebreak
+
+\section{Introduction}
+Nucleofile is meant to serve as a general purpose software aid to chemists
+and all who need scientific programs. Nucleofile will always be free and
+and open source.
+
+\section{User Guide}
+Nucleofile is designed to be flexible and work with you through many
+interfaces. The three primary ways to interact with nucleofile are
+with the GUI, TUI, and the interpreter. Project files are saved as ``.ncfl''
+extension. The app can also be controled through a script languaged called ``aangstrom'' which uses the ``.aang'' suffix for files.
+
+\subsection{Flags}
+\begin{itemize}
+\item -f/--file Pass a file or diretory to nucleofile.
+\item -d/--debug
+\item -g/--gui Open nucleofile without opening the GUI.
+\end{itemize}
+
+\subsection{TUI Guide}
+To use the TUI, open nucleofile with ``ncfl -t''.
+
+\section{Math}
+There are multiple constants used in nucleofile, these are stated here
+ with bold script as textbf{constant}.
+
+\subsection{Determining the area under a function}
+If you want to determine \(\int_a^b x^2\,dx\) for your system.
+
+\end{document}

@@ -1,2 +1,2 @@
-# dirtywork (alpha 0.0.1)
+# dirtywork v0.1.1 (pre-alpha)
 A simple chess engine.
