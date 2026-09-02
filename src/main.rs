@@ -13,7 +13,10 @@ fn main() -> Result<()> {
 }
 
 fn run_app(args: cli::Params) -> Result<()> {
-    dw_analysis(board);
-    println!("Worked!");
+    let game = dw_engine::GameState::default();
+    // let best_move = dw_engine::BoardState::default();
+    // let eval: f32 = 0;
+    let (best_move, eval) = dw_analysis(game, 5);
+    println!("eval: {}", eval);
     Ok(())
 }
