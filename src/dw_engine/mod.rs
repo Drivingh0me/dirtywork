@@ -38,9 +38,10 @@ pub struct BoardState {
     b_rook: Piece,
     b_queen: Piece,
     b_king: Piece,
+    // Pawn that moved two squares in the previous turn.
+    dbl_pawn: Piece,
 }
 
-// #[derive(Debug, PartialEq, Default)]
 impl BoardState {
     fn new() -> Self {
         Self {
@@ -57,17 +58,45 @@ impl BoardState {
             b_rook: Piece { bit_board: 0 },
             b_queen: Piece { bit_board: 0 },
             b_king: Piece { bit_board: 0 },
+            dbl_pawn: Piece { bit_board: 0 },
+        }
+    }
+}
+
+impl Default for BoardState {
+    fn default() -> Self {
+        // Starting position for all pieces.
+        Self{
+            tomove: Color::White,
+            w_pawn: Piece { bit_board: 0 },
+            w_knight: Piece { bit_board: 0 },
+            w_bishop: Piece { bit_board: 0 },
+            w_rook: Piece { bit_board: 0 },
+            w_queen: Piece { bit_board: 0 },
+            w_king: Piece { bit_board: 0 },
+            b_pawn: Piece { bit_board: 0 },
+            b_knight: Piece { bit_board: 0 },
+            b_bishop: Piece { bit_board: 0 },
+            b_rook: Piece { bit_board: 0 },
+            b_queen: Piece { bit_board: 0 },
+            b_king: Piece { bit_board: 0 },
+            dbl_pawn: Piece { bit_board: 0 },
         }
     }
 }
 
 impl Default for GameState {
     fn default() -> Self {
+        let mut board = Vec::<BoardState>::new();
+
+        let mut starting_position = BoardState::default();
+
+        board.push(starting_position);
+
         Self {
             haswon: Checkmate::No,
             incheck: false,
-            board: Vec::<BoardState>::new(),
-            enpassant: Piece { bit_board: 0 },
+            board: board,
         }
     }
 }
@@ -76,10 +105,9 @@ pub struct GameState {
     haswon: Checkmate,
     incheck: bool,
     board: Vec<BoardState>,
-    enpassant: Piece,
 }
 
-// Returns the best move a s a BoardState and the eval as a float.
+// Returns the best move as a BoardState and the eval as a float.
 pub fn dw_analysis(
     state: GameState,
     depth: u32
@@ -87,7 +115,7 @@ pub fn dw_analysis(
     let eval: f32 = 0.0;
     let best_move: BoardState = state
         .board
-        .get(0)
+        .last()
         .cloned()
         .ok_or(
         Error::VectorSize
