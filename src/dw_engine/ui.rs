@@ -6,7 +6,10 @@ pub fn print_board(board: BoardState) -> Result<()> {
     // Convert bitboard into Vec of peices.
     let w_pawn_coords = get_piece_coords(board.w_pawn.bit_board);
 
-    dbg!(w_pawn_coords);
+    dbg!(&w_pawn_coords);
+
+    let squares = build_board(w_pawn_coords);
+    print_squares(squares);
     Ok(())
 }
 
@@ -29,23 +32,27 @@ fn get_piece_coords(bitboard: u64) -> Vec<(u8, u8)> {
     pieces
 }
 
-fn build_board() -> [char; 64] {
-    let pieces: [char; 64] = [' '; 64];
+fn build_board(pieces: Vec<(u8, u8)>) -> [char; 64] {
+    let mut squares: [char; 64] = ['_'; 64];
 
-    pieces
+    for p in pieces.iter() {
+        squares[usize::from(p.0) % 8 + usize::from(p.1)] = 'p';
+    }
+
+    squares
 }
 
-fn print_board_string(bp: [char; 64]) {
+fn print_squares(sq: [char; 64]) {
     for i in 0..7 {
         println!("{}{}{}{}{}{}{}{}",
-            bp[i+0],
-            bp[i+1],
-            bp[i+2],
-            bp[i+3],
-            bp[i+4],
-            bp[i+5],
-            bp[i+6],
-            bp[i+7]
+            sq[i+0],
+            sq[i+1],
+            sq[i+2],
+            sq[i+3],
+            sq[i+4],
+            sq[i+5],
+            sq[i+6],
+            sq[i+7]
         )
     }
 }
