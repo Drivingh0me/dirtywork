@@ -18,5 +18,6 @@ fn run_app(args: cli::Params) -> Result<()> {
     let (best_move, eval) = dw_engine::dw_analysis(game, 5)?;
     println!("eval: {}", eval);
     dbg!(best_move);
+    dw_engine::ui::print_board(best_move)?;
     Ok(())
 }

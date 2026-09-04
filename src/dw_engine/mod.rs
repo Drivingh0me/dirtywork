@@ -1,4 +1,5 @@
 mod mcmath;
+pub mod ui;
 
 use crate::error::Result;
 use crate::error::Error;
@@ -10,12 +11,12 @@ pub enum Color {
     Black,
 }
 
-#[derive(Debug, PartialEq, Default, Clone, Copy)]
-pub enum Checkmate {
-    #[default]
-    No,
-    Yes(Color)
-}
+// #[derive(Debug, PartialEq, Default, Clone, Copy)]
+// pub enum Checkmate {
+//     #[default]
+//     No,
+//     Yes(Color)
+// }
 
 // Bitboard is a1 -> h1 -> a2 -> h2... -> h8
 #[derive(Debug, PartialEq, Default, Clone, Copy)]
@@ -68,13 +69,13 @@ impl Default for BoardState {
         // Starting position for all pieces.
         Self{
             tomove: Color::White,
-            w_pawn: Piece { bit_board: 0 },
+            w_pawn: Piece { bit_board: 65280 },
             w_knight: Piece { bit_board: 0 },
             w_bishop: Piece { bit_board: 0 },
             w_rook: Piece { bit_board: 0 },
             w_queen: Piece { bit_board: 0 },
             w_king: Piece { bit_board: 0 },
-            b_pawn: Piece { bit_board: 0 },
+            b_pawn: Piece { bit_board: 71776119061217300 },
             b_knight: Piece { bit_board: 0 },
             b_bishop: Piece { bit_board: 0 },
             b_rook: Piece { bit_board: 0 },
@@ -83,6 +84,12 @@ impl Default for BoardState {
             dbl_pawn: Piece { bit_board: 0 },
         }
     }
+}
+
+pub struct GameState {
+    haswon: Option<Color>,
+    incheck: bool,
+    board: Vec<BoardState>,
 }
 
 impl Default for GameState {
@@ -94,17 +101,11 @@ impl Default for GameState {
         board.push(starting_position);
 
         Self {
-            haswon: Checkmate::No,
+            haswon: Option::default(),
             incheck: false,
             board: board,
         }
     }
-}
-
-pub struct GameState {
-    haswon: Checkmate,
-    incheck: bool,
-    board: Vec<BoardState>,
 }
 
 // Returns the best move as a BoardState and the eval as a float.
