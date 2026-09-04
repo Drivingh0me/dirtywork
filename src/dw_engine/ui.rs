@@ -9,6 +9,7 @@ pub fn print_board(board: BoardState) -> Result<()> {
     dbg!(&w_pawn_coords);
 
     let squares = build_board(w_pawn_coords);
+    dbg!(squares);
     print_squares(squares);
     Ok(())
 }
@@ -36,23 +37,28 @@ fn build_board(pieces: Vec<(u8, u8)>) -> [char; 64] {
     let mut squares: [char; 64] = ['_'; 64];
 
     for p in pieces.iter() {
-        squares[usize::from(p.0) % 8 + usize::from(p.1)] = 'p';
+        squares[get_square_index(p)] = 'p';
     }
 
     squares
 }
 
+fn get_square_index(s: &(u8, u8)) -> usize {
+    let i: usize = usize::from(s.0) + (usize::from(s.1) * 8);
+    i
+}
+
 fn print_squares(sq: [char; 64]) {
     for i in 0..7 {
         println!("{}{}{}{}{}{}{}{}",
-            sq[i+0],
-            sq[i+1],
-            sq[i+2],
-            sq[i+3],
-            sq[i+4],
-            sq[i+5],
-            sq[i+6],
-            sq[i+7]
+            sq[i * 8 + 0],
+            sq[i * 8 + 1],
+            sq[i * 8 + 2],
+            sq[i * 8 + 3],
+            sq[i * 8 + 4],
+            sq[i * 8 + 5],
+            sq[i * 8 + 6],
+            sq[i * 8 + 7]
         )
     }
 }
