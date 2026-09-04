@@ -1,8 +1,7 @@
 mod mcmath;
 pub mod ui;
 
-use crate::error::Result;
-use crate::error::Error;
+use crate::error::{Result, Error};
 
 #[derive(Debug, PartialEq, Default, Clone, Copy)]
 pub enum Color {
@@ -70,17 +69,17 @@ impl Default for BoardState {
         Self{
             tomove: Color::White,
             w_pawn: Piece { bit_board: 65280 },
-            w_knight: Piece { bit_board: 0 },
-            w_bishop: Piece { bit_board: 0 },
-            w_rook: Piece { bit_board: 0 },
-            w_queen: Piece { bit_board: 0 },
-            w_king: Piece { bit_board: 0 },
-            b_pawn: Piece { bit_board: 71776119061217300 },
-            b_knight: Piece { bit_board: 0 },
-            b_bishop: Piece { bit_board: 0 },
-            b_rook: Piece { bit_board: 0 },
-            b_queen: Piece { bit_board: 0 },
-            b_king: Piece { bit_board: 0 },
+            w_knight: Piece { bit_board: 66 },
+            w_bishop: Piece { bit_board: 36 },
+            w_rook: Piece { bit_board: 129 },
+            w_queen: Piece { bit_board: 16 },
+            w_king: Piece { bit_board: 8 },
+            b_pawn: Piece { bit_board: 71776119061217280 },
+            b_knight: Piece { bit_board: 4755801206503243776 },
+            b_bishop: Piece { bit_board: 2594073385365405696 },
+            b_rook: Piece { bit_board: 9295429630892703744 },
+            b_queen: Piece { bit_board: 1152921504606846976 },
+            b_king: Piece { bit_board: 576460752303423488 },
             dbl_pawn: Piece { bit_board: 0 },
         }
     }
