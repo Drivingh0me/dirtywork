@@ -98,41 +98,41 @@ fn build_board(pieces: PrintableBoard) -> [char; 64] {
     }
 
     for p in pieces.b_pawn.iter() {
-        squares[get_square_index(p)] = 'p';
+        squares[get_square_index(p)] = '1';
     }
 
     for p in pieces.b_knight.iter() {
-        squares[get_square_index(p)] = 'n';
+        squares[get_square_index(p)] = '2';
     }
 
     for p in pieces.b_bishop.iter() {
-        squares[get_square_index(p)] = 'b';
+        squares[get_square_index(p)] = '3';
     }
 
     for p in pieces.b_rook.iter() {
-        squares[get_square_index(p)] = 'r';
+        squares[get_square_index(p)] = '4';
     }
 
     for p in pieces.b_queen.iter() {
-        squares[get_square_index(p)] = 'q';
+        squares[get_square_index(p)] = '5';
     }
 
     for p in pieces.b_king.iter() {
-        squares[get_square_index(p)] = 'k';
+        squares[get_square_index(p)] = '6';
     }
 
     squares
 }
 
-fn build_boardx(pieces: Vec<(u8, u8)>) -> [char; 64] {
-    let mut squares: [char; 64] = ['_'; 64];
-
-    for p in pieces.iter() {
-        squares[get_square_index(p)] = 'p';
-    }
-
-    squares
-}
+// fn build_boardx(pieces: Vec<(u8, u8)>) -> [char; 64] {
+//     let mut squares: [char; 64] = ['_'; 64];
+//
+//     for p in pieces.iter() {
+//         squares[get_square_index(p)] = 'p';
+//     }
+//
+//     squares
+// }
 
 fn get_square_index(s: &(u8, u8)) -> usize {
     let i: usize = usize::from(s.0) + (usize::from(s.1) * 8);
@@ -144,24 +144,43 @@ fn print_squares(squares: [char; 64]) {
     sq.reverse();
     for i in 0..4 {
         println!("{}{}{}{}{}{}{}{}",
-            sq[2 * i * 8 + 0],
-            sq[2 * i * 8 + 1],
-            sq[2 * i * 8 + 2],
-            sq[2 * i * 8 + 3],
-            sq[2 * i * 8 + 4],
-            sq[2 * i * 8 + 5],
-            sq[2 * i * 8 + 6],
-            sq[2 * i * 8 + 7]
+            ws(sq[2 * i * 8 + 0]),
+            ws(sq[2 * i * 8 + 1]),
+            ws(sq[2 * i * 8 + 2]),
+            ws(sq[2 * i * 8 + 3]),
+            ws(sq[2 * i * 8 + 4]),
+            ws(sq[2 * i * 8 + 5]),
+            ws(sq[2 * i * 8 + 6]),
+            ws(sq[2 * i * 8 + 7])
         );
         println!("{}{}{}{}{}{}{}{}",
-            sq[(2 * i + 1) * 8 + 0],
-            sq[(2 * i + 1) * 8 + 1],
-            sq[(2 * i + 1) * 8 + 2],
-            sq[(2 * i + 1) * 8 + 3],
-            sq[(2 * i + 1) * 8 + 4],
-            sq[(2 * i + 1) * 8 + 5],
-            sq[(2 * i + 1) * 8 + 6],
-            sq[(2 * i + 1) * 8 + 7]
+            ws(sq[(2 * i + 1) * 8 + 0]),
+            ws(sq[(2 * i + 1) * 8 + 1]),
+            ws(sq[(2 * i + 1) * 8 + 2]),
+            ws(sq[(2 * i + 1) * 8 + 3]),
+            ws(sq[(2 * i + 1) * 8 + 4]),
+            ws(sq[(2 * i + 1) * 8 + 5]),
+            ws(sq[(2 * i + 1) * 8 + 6]),
+            ws(sq[(2 * i + 1) * 8 + 7])
         );
+    }
+}
+
+fn ws(p: char) -> String {
+    match p {
+        'p' => "\x1B[30;47mp\x1B[0m".to_string(),
+        'n' => "n".to_string(),
+        'b' => "b".to_string(),
+        'r' => "r".to_string(),
+        'q' => "q".to_string(),
+        'k' => "k".to_string(),
+        '1' => "p".to_string(),
+        '2' => "n".to_string(),
+        '3' => "b".to_string(),
+        '4' => "n".to_string(),
+        '5' => "n".to_string(),
+        '6' => "n".to_string(),
+        '_' => " ".to_string(),
+        _ => "x".to_string(),
     }
 }
