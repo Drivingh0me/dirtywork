@@ -112,7 +112,7 @@ fn build_board(pieces: PrintableBoard) -> [char; 64] {
     for p in pieces.b_rook.iter() {
         squares[get_square_index(p)] = 'r';
     }
-    
+
     for p in pieces.b_queen.iter() {
         squares[get_square_index(p)] = 'q';
     }
@@ -139,17 +139,29 @@ fn get_square_index(s: &(u8, u8)) -> usize {
     i
 }
 
-fn print_squares(sq: [char; 64]) {
-    for i in 0..8 {
+fn print_squares(squares: [char; 64]) {
+    let mut sq = squares.clone();
+    sq.reverse();
+    for i in 0..4 {
         println!("{}{}{}{}{}{}{}{}",
-            sq[i * 8 + 0],
-            sq[i * 8 + 1],
-            sq[i * 8 + 2],
-            sq[i * 8 + 3],
-            sq[i * 8 + 4],
-            sq[i * 8 + 5],
-            sq[i * 8 + 6],
-            sq[i * 8 + 7]
-        )
+            sq[2 * i * 8 + 0],
+            sq[2 * i * 8 + 1],
+            sq[2 * i * 8 + 2],
+            sq[2 * i * 8 + 3],
+            sq[2 * i * 8 + 4],
+            sq[2 * i * 8 + 5],
+            sq[2 * i * 8 + 6],
+            sq[2 * i * 8 + 7]
+        );
+        println!("{}{}{}{}{}{}{}{}",
+            sq[(2 * i + 1) * 8 + 0],
+            sq[(2 * i + 1) * 8 + 1],
+            sq[(2 * i + 1) * 8 + 2],
+            sq[(2 * i + 1) * 8 + 3],
+            sq[(2 * i + 1) * 8 + 4],
+            sq[(2 * i + 1) * 8 + 5],
+            sq[(2 * i + 1) * 8 + 6],
+            sq[(2 * i + 1) * 8 + 7]
+        );
     }
 }
