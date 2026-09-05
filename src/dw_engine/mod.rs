@@ -103,8 +103,21 @@ impl Default for GameState {
 // Returns the best move as a BoardState and the eval as a float.
 pub fn dw_analysis(
     state: GameState,
-    depth: u32
+    depth: usize
 ) -> Result<(BoardState, f32)> {
+    println!("thinking...");
+
+    // Loop over this. ------
+    // Make a legal move.
+    let pos_eval = evaluate_pos(state
+        .board
+        .last()
+        // .cloned()
+        .ok_or(Error::VectorSize)?
+    );
+
+    //------------------------
+
     let eval: f32 = 0.0;
     let best_move: BoardState = state
         .board
@@ -116,4 +129,39 @@ pub fn dw_analysis(
 
     println!("ran analysis");
     Ok((best_move, eval))
+}
+
+fn evaluate_pos(state: &BoardState) -> f32 {
+    let material_weight: f32 = 0.5;
+    let control_weight: f32 = 0.3;
+    let agro_weight: f32 = 0.2;
+
+    let material = count_material(&state);
+    println!("material is: {}", material);
+
+    let control = measure_control(&state);
+    println!("control is: {}", control);
+
+    0.0
+}
+
+fn count_material(state: &BoardState) -> f32 {
+    let pawns = how_many(state.w_pawn) - how_many(state.b_pawn);
+    0.0
+}
+
+fn how_many(p: Piece) -> u8 {
+    let mut bits = p.bit_board;
+    let mut num: u8 = 0;
+    while bits != 0 {
+        bits &= bits - 1;
+        num += 1;
+    }
+    num
+}
+
+fn measure_control(state: &BoardState) -> f32 {
+    
+
+    0.0
 }
