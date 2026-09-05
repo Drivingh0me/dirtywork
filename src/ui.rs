@@ -1,6 +1,7 @@
 use crate::error::{Error, Result};
 
-use crate::dw_engine::{BoardState};
+use crate::dw_engine::{BoardState, Piece, Color};
+use crate::dw_engine::{get_piece_coords};
 
 #[derive(Debug)]
 struct PrintableBoard {
@@ -21,18 +22,18 @@ struct PrintableBoard {
 impl PrintableBoard {
     fn getfrom (board: BoardState) -> Self {
         Self {
-            w_pawn: get_piece_coords(board.w_pawn.bit_board),
-            w_knight: get_piece_coords(board.w_knight.bit_board),
-            w_bishop: get_piece_coords(board.w_bishop.bit_board),
-            w_rook: get_piece_coords(board.w_rook.bit_board),
-            w_queen: get_piece_coords(board.w_queen.bit_board),
-            w_king: get_piece_coords(board.w_king.bit_board),
-            b_pawn: get_piece_coords(board.b_pawn.bit_board),
-            b_knight: get_piece_coords(board.b_knight.bit_board),
-            b_bishop: get_piece_coords(board.b_bishop.bit_board),
-            b_rook: get_piece_coords(board.b_rook.bit_board),
-            b_queen: get_piece_coords(board.b_queen.bit_board),
-            b_king: get_piece_coords(board.b_king.bit_board),
+            w_pawn: get_piece_coords(&board, &Piece::Pawn(Color::White)),
+            w_knight: get_piece_coords(&board, &Piece::Knight(Color::White)),
+            w_bishop: get_piece_coords(&board, &Piece::Bishop(Color::White)),
+            w_rook: get_piece_coords(&board, &Piece::Rook(Color::White)),
+            w_queen: get_piece_coords(&board, &Piece::Queen(Color::White)),
+            w_king: get_piece_coords(&board, &Piece::King(Color::White)),
+            b_pawn: get_piece_coords(&board, &Piece::Pawn(Color::Black)),
+            b_knight: get_piece_coords(&board, &Piece::Knight(Color::Black)),
+            b_bishop: get_piece_coords(&board, &Piece::Bishop(Color::Black)),
+            b_rook: get_piece_coords(&board, &Piece::Rook(Color::Black)),
+            b_queen: get_piece_coords(&board, &Piece::Queen(Color::Black)),
+            b_king: get_piece_coords(&board, &Piece::King(Color::Black)),
         }
     }
 }
@@ -43,27 +44,6 @@ pub fn print_board(board: BoardState) -> Result<()> {
     let squares = build_board(pieces);
     print_squares(squares);
     Ok(())
-}
-
-fn get_piece_coords(bitboard: u64) -> Vec<(u8, u8)> {
-    let mut pieces = Vec::new();
-    let mut bb = bitboard;
-
-    // AI generated, human verified--------.
-    while bb != 0 {
-        // Get the index of the lowest set bit (0-63)
-        let square = bb.trailing_zeros() as u8;
-
-        // Convert index to coordinates (file and rank)
-        let file = square % 8;
-        let rank = square / 8;
-        pieces.push((file, rank));
-        // Clear the lowest set bit
-        bb &= bb - 1;
-    }
-    //--------------------------------------.
-
-    pieces
 }
 
 fn build_board(pieces: PrintableBoard) -> [char; 64] {

@@ -10,48 +10,62 @@ pub enum Color {
     Black,
 }
 
+pub enum Piece {
+    Pawn(Color),
+    Knight(Color),
+    Bishop(Color),
+    Rook(Color),
+    Queen(Color),
+    King(Color),
+}
+
+pub struct Move {
+    piece: Piece,
+    bits: BitBoard,
+}
+
 // Bitboard is a1 -> h1 -> a2 -> h2... -> h8
 #[derive(Debug, PartialEq, Default, Clone, Copy)]
-pub struct Piece {
-    pub bit_board: u64,
+pub struct BitBoard {
+    bits: u64,
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub struct BoardState {
-    pub tomove: Color,
-    pub w_pawn: Piece,
-    pub w_knight: Piece,
-    pub w_bishop: Piece,
-    pub w_rook: Piece,
-    pub w_queen: Piece,
-    pub w_king: Piece,
-    pub b_pawn: Piece,
-    pub b_knight: Piece,
-    pub b_bishop: Piece,
-    pub b_rook: Piece,
-    pub b_queen: Piece,
-    pub b_king: Piece,
+    tomove: Color,
+    w_pawn: BitBoard,
+    w_knight: BitBoard,
+    w_bishop: BitBoard,
+    w_rook: BitBoard,
+    w_queen: BitBoard,
+    w_king: BitBoard,
+    b_pawn: BitBoard,
+    b_knight: BitBoard,
+    b_bishop: BitBoard,
+    b_rook: BitBoard,
+    b_queen: BitBoard,
+    b_king: BitBoard,
     // Pawn that moved two squares in the previous turn.
-    pub dbl_pawn: Piece,
+    dbl_pawn: BitBoard,
 }
 
 impl BoardState {
     fn new() -> Self {
         Self {
             tomove: Color::White,
-            w_pawn: Piece { bit_board: 0 },
-            w_knight: Piece { bit_board: 0 },
-            w_bishop: Piece { bit_board: 0 },
-            w_rook: Piece { bit_board: 0 },
-            w_queen: Piece { bit_board: 0 },
-            w_king: Piece { bit_board: 0 },
-            b_pawn: Piece { bit_board: 0 },
-            b_knight: Piece { bit_board: 0 },
-            b_bishop: Piece { bit_board: 0 },
-            b_rook: Piece { bit_board: 0 },
-            b_queen: Piece { bit_board: 0 },
-            b_king: Piece { bit_board: 0 },
-            dbl_pawn: Piece { bit_board: 0 },
+            w_pawn: BitBoard { bits: 0 },
+            w_knight: BitBoard { bits: 0 },
+            w_bishop: BitBoard { bits: 0 },
+            w_rook: BitBoard { bits: 0 },
+            w_queen: BitBoard { bits: 0 },
+            w_king: BitBoard { bits: 0 },
+            b_pawn: BitBoard { bits: 0 },
+            b_knight: BitBoard { bits: 0 },
+            b_bishop: BitBoard { bits: 0 },
+            b_rook: BitBoard { bits: 0 },
+            b_queen: BitBoard { bits: 0 },
+            b_king: BitBoard { bits: 0 },
+            dbl_pawn: BitBoard { bits: 0 },
         }
     }
 }
@@ -61,19 +75,19 @@ impl Default for BoardState {
         // Starting position for all pieces.
         Self{
             tomove: Color::White,
-            w_pawn: Piece { bit_board: 65280 },
-            w_knight: Piece { bit_board: 66 },
-            w_bishop: Piece { bit_board: 36 },
-            w_rook: Piece { bit_board: 129 },
-            w_queen: Piece { bit_board: 16 },
-            w_king: Piece { bit_board: 8 },
-            b_pawn: Piece { bit_board: 71776119061217280 },
-            b_knight: Piece { bit_board: 4755801206503243776 },
-            b_bishop: Piece { bit_board: 2594073385365405696 },
-            b_rook: Piece { bit_board: 9295429630892703744 },
-            b_queen: Piece { bit_board: 1152921504606846976 },
-            b_king: Piece { bit_board: 576460752303423488 },
-            dbl_pawn: Piece { bit_board: 0 },
+            w_pawn: BitBoard { bits: 65280 },
+            w_knight: BitBoard { bits: 66 },
+            w_bishop: BitBoard { bits: 36 },
+            w_rook: BitBoard { bits: 129 },
+            w_queen: BitBoard { bits: 16 },
+            w_king: BitBoard { bits: 8 },
+            b_pawn: BitBoard { bits: 71776119061217280 },
+            b_knight: BitBoard { bits: 4755801206503243776 },
+            b_bishop: BitBoard { bits: 2594073385365405696 },
+            b_rook: BitBoard { bits: 9295429630892703744 },
+            b_queen: BitBoard { bits: 1152921504606846976 },
+            b_king: BitBoard { bits: 576460752303423488 },
+            dbl_pawn: BitBoard { bits: 0 },
         }
     }
 }
@@ -159,8 +173,8 @@ fn count_material(state: &BoardState) -> f32 {
     1.0 * p + 2.9 * n + 3.0 * b + 5.0 * r + 9.0 * q
 }
 
-fn how_many(p: Piece) -> u8 {
-    let mut bits = p.bit_board;
+fn how_many(p: BitBoard) -> u8 {
+    let mut bits = p.bits;
     let mut num: u8 = 0;
     while bits != 0 {
         bits &= bits - 1;
@@ -173,4 +187,60 @@ fn measure_control(state: &BoardState) -> f32 {
     // Form a movemap for all 64 positions and xor the current map.
 
     0.0
+}
+
+pub fn get_piece_coords(board: &BoardState, piece: &Piece) -> Vec<(u8, u8)> {
+    let bitboard = get_bitboard(&board, piece);
+
+    let mut pieces = Vec::new();
+    let mut bb = bitboard.bits;
+
+    // AI generated, human verified--------.
+    while bb != 0 {
+        // Get the index of the lowest set bit (0-63)
+        let square = bb.trailing_zeros() as u8;
+
+        // Convert index to coordinates (file and rank)
+        let file = square % 8;
+        let rank = square / 8;
+        pieces.push((file, rank));
+        // Clear the lowest set bit
+        bb &= bb - 1;
+    }
+    //--------------------------------------.
+
+    pieces
+}
+
+fn get_bitboard(board: &BoardState, piece: &Piece) -> BitBoard {
+    let bitboard: BitBoard = match piece {
+        Piece::Pawn(color) => match color {
+            Color::White => board.w_pawn,
+            Color::Black => board.b_pawn,
+        }
+        Piece::Knight(color) => match color {
+            Color::White => board.w_knight,
+            Color::Black => board.b_knight,
+        }
+        Piece::Bishop(color) => match color {
+            Color::White => board.w_bishop,
+            Color::Black => board.b_bishop,
+        }
+        Piece::Rook(color) => match color {
+            Color::White => board.w_rook,
+            Color::Black => board.b_rook,
+        }
+        Piece::Queen(color) => match color {
+            Color::White => board.w_queen,
+            Color::Black => board.b_queen,
+        }
+        Piece::King(color) => match color {
+            Color::White => board.w_king,
+            Color::Black => board.b_king,
+        }
+        _ => board.dbl_pawn,
+    };
+
+    bitboard
+
 }
