@@ -1,5 +1,5 @@
 mod mcmath;
-pub mod ui;
+// pub mod ui;
 
 use crate::error::{Result, Error};
 
@@ -10,36 +10,29 @@ pub enum Color {
     Black,
 }
 
-// #[derive(Debug, PartialEq, Default, Clone, Copy)]
-// pub enum Checkmate {
-//     #[default]
-//     No,
-//     Yes(Color)
-// }
-
 // Bitboard is a1 -> h1 -> a2 -> h2... -> h8
 #[derive(Debug, PartialEq, Default, Clone, Copy)]
-struct Piece {
-    bit_board: u64,
+pub struct Piece {
+    pub bit_board: u64,
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub struct BoardState {
-    tomove: Color,
-    w_pawn: Piece,
-    w_knight: Piece,
-    w_bishop: Piece,
-    w_rook: Piece,
-    w_queen: Piece,
-    w_king: Piece,
-    b_pawn: Piece,
-    b_knight: Piece,
-    b_bishop: Piece,
-    b_rook: Piece,
-    b_queen: Piece,
-    b_king: Piece,
+    pub tomove: Color,
+    pub w_pawn: Piece,
+    pub w_knight: Piece,
+    pub w_bishop: Piece,
+    pub w_rook: Piece,
+    pub w_queen: Piece,
+    pub w_king: Piece,
+    pub b_pawn: Piece,
+    pub b_knight: Piece,
+    pub b_bishop: Piece,
+    pub b_rook: Piece,
+    pub b_queen: Piece,
+    pub b_king: Piece,
     // Pawn that moved two squares in the previous turn.
-    dbl_pawn: Piece,
+    pub dbl_pawn: Piece,
 }
 
 impl BoardState {

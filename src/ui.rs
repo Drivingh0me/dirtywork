@@ -39,13 +39,8 @@ impl PrintableBoard {
 
 pub fn print_board(board: BoardState) -> Result<()> {
     // Convert bitboard into Vec of peices.
-    // let w_pawn_coords = get_piece_coords(board.w_pawn.bit_board);
     let pieces = PrintableBoard::getfrom(board);
-
-    dbg!(&pieces);
-
     let squares = build_board(pieces);
-    dbg!(squares);
     print_squares(squares);
     Ok(())
 }
@@ -54,7 +49,7 @@ fn get_piece_coords(bitboard: u64) -> Vec<(u8, u8)> {
     let mut pieces = Vec::new();
     let mut bb = bitboard;
 
-    // AI generated, verified.
+    // AI generated, human verified--------.
     while bb != 0 {
         // Get the index of the lowest set bit (0-63)
         let square = bb.trailing_zeros() as u8;
@@ -66,6 +61,7 @@ fn get_piece_coords(bitboard: u64) -> Vec<(u8, u8)> {
         // Clear the lowest set bit
         bb &= bb - 1;
     }
+    //--------------------------------------.
 
     pieces
 }
@@ -124,16 +120,6 @@ fn build_board(pieces: PrintableBoard) -> [char; 64] {
     squares
 }
 
-// fn build_boardx(pieces: Vec<(u8, u8)>) -> [char; 64] {
-//     let mut squares: [char; 64] = ['_'; 64];
-//
-//     for p in pieces.iter() {
-//         squares[get_square_index(p)] = 'p';
-//     }
-//
-//     squares
-// }
-
 fn get_square_index(s: &(u8, u8)) -> usize {
     let i: usize = usize::from(s.0) + (usize::from(s.1) * 8);
     i
@@ -145,22 +131,22 @@ fn print_squares(squares: [char; 64]) {
     for i in 0..4 {
         println!("{}{}{}{}{}{}{}{}",
             ws(sq[2 * i * 8 + 0]),
-            ws(sq[2 * i * 8 + 1]),
+            bs(sq[2 * i * 8 + 1]),
             ws(sq[2 * i * 8 + 2]),
-            ws(sq[2 * i * 8 + 3]),
+            bs(sq[2 * i * 8 + 3]),
             ws(sq[2 * i * 8 + 4]),
-            ws(sq[2 * i * 8 + 5]),
+            bs(sq[2 * i * 8 + 5]),
             ws(sq[2 * i * 8 + 6]),
-            ws(sq[2 * i * 8 + 7])
+            bs(sq[2 * i * 8 + 7])
         );
         println!("{}{}{}{}{}{}{}{}",
-            ws(sq[(2 * i + 1) * 8 + 0]),
+            bs(sq[(2 * i + 1) * 8 + 0]),
             ws(sq[(2 * i + 1) * 8 + 1]),
-            ws(sq[(2 * i + 1) * 8 + 2]),
+            bs(sq[(2 * i + 1) * 8 + 2]),
             ws(sq[(2 * i + 1) * 8 + 3]),
-            ws(sq[(2 * i + 1) * 8 + 4]),
+            bs(sq[(2 * i + 1) * 8 + 4]),
             ws(sq[(2 * i + 1) * 8 + 5]),
-            ws(sq[(2 * i + 1) * 8 + 6]),
+            bs(sq[(2 * i + 1) * 8 + 6]),
             ws(sq[(2 * i + 1) * 8 + 7])
         );
     }
@@ -168,19 +154,38 @@ fn print_squares(squares: [char; 64]) {
 
 fn ws(p: char) -> String {
     match p {
-        'p' => "\x1B[30;47mp\x1B[0m".to_string(),
-        'n' => "n".to_string(),
-        'b' => "b".to_string(),
-        'r' => "r".to_string(),
-        'q' => "q".to_string(),
-        'k' => "k".to_string(),
-        '1' => "p".to_string(),
-        '2' => "n".to_string(),
-        '3' => "b".to_string(),
-        '4' => "n".to_string(),
-        '5' => "n".to_string(),
-        '6' => "n".to_string(),
-        '_' => " ".to_string(),
+        'p' => "\x1B[37;45mp\x1B[0m".to_string(),
+        'n' => "\x1B[37;45mn\x1B[0m".to_string(),
+        'b' => "\x1B[37;45mb\x1B[0m".to_string(),
+        'r' => "\x1B[37;45mr\x1B[0m".to_string(),
+        'q' => "\x1B[37;45mq\x1B[0m".to_string(),
+        'k' => "\x1B[37;45mk\x1B[0m".to_string(),
+        '1' => "\x1B[30;45mp\x1B[0m".to_string(),
+        '2' => "\x1B[30;45mn\x1B[0m".to_string(),
+        '3' => "\x1B[30;45mb\x1B[0m".to_string(),
+        '4' => "\x1B[30;45mr\x1B[0m".to_string(),
+        '5' => "\x1B[30;45mq\x1B[0m".to_string(),
+        '6' => "\x1B[30;45mk\x1B[0m".to_string(),
+        '_' => "\x1B[30;45m \x1B[0m".to_string(),
+        _ => "x".to_string(),
+    }
+}
+
+fn bs(p: char) -> String {
+    match p {
+        'p' => "\x1B[37;44mp\x1B[0m".to_string(),
+        'n' => "\x1B[37;44mn\x1B[0m".to_string(),
+        'b' => "\x1B[37;44mb\x1B[0m".to_string(),
+        'r' => "\x1B[37;44mr\x1B[0m".to_string(),
+        'q' => "\x1B[37;44mq\x1B[0m".to_string(),
+        'k' => "\x1B[37;44mk\x1B[0m".to_string(),
+        '1' => "\x1B[30;44mp\x1B[0m".to_string(),
+        '2' => "\x1B[30;44mn\x1B[0m".to_string(),
+        '3' => "\x1B[30;44mb\x1B[0m".to_string(),
+        '4' => "\x1B[30;44mr\x1B[0m".to_string(),
+        '5' => "\x1B[30;44mq\x1B[0m".to_string(),
+        '6' => "\x1B[30;44mk\x1B[0m".to_string(),
+        '_' => "\x1B[30;44m \x1B[0m".to_string(),
         _ => "x".to_string(),
     }
 }

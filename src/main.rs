@@ -1,5 +1,6 @@
 mod cli;
 mod dw_engine;
+mod ui;
 pub mod error;
 
 use error::Result;
@@ -17,7 +18,7 @@ fn run_app(args: cli::Params) -> Result<()> {
     let game = dw_engine::GameState::default();
     let (best_move, eval) = dw_engine::dw_analysis(game, 5)?;
     println!("eval: {}", eval);
-    dbg!(best_move);
-    dw_engine::ui::print_board(best_move)?;
+    // dbg!(best_move);
+    ui::print_board(best_move)?;
     Ok(())
 }
