@@ -1,5 +1,4 @@
 mod mcmath;
-// pub mod ui;
 
 use crate::error::{Result, Error};
 
@@ -195,7 +194,8 @@ pub fn get_piece_coords(board: &BoardState, piece: &Piece) -> Vec<(u8, u8)> {
     let mut pieces = Vec::new();
     let mut bb = bitboard.bits;
 
-    // AI generated, human verified--------.
+    //=========================================================================
+    // AI generated, verified.
     while bb != 0 {
         // Get the index of the lowest set bit (0-63)
         let square = bb.trailing_zeros() as u8;
@@ -207,7 +207,7 @@ pub fn get_piece_coords(board: &BoardState, piece: &Piece) -> Vec<(u8, u8)> {
         // Clear the lowest set bit
         bb &= bb - 1;
     }
-    //--------------------------------------.
+    //=========================================================================
 
     pieces
 }
