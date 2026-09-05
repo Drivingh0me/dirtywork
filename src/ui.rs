@@ -129,7 +129,8 @@ fn print_squares(squares: [char; 64]) {
     let mut sq = squares.clone();
     sq.reverse();
     for i in 0..4 {
-        println!("{}{}{}{}{}{}{}{}",
+        println!("{}{}{}{}{}{}{}{}{}",
+            9 - (2 * i + 1),
             ws(sq[2 * i * 8 + 0]),
             bs(sq[2 * i * 8 + 1]),
             ws(sq[2 * i * 8 + 2]),
@@ -139,7 +140,8 @@ fn print_squares(squares: [char; 64]) {
             ws(sq[2 * i * 8 + 6]),
             bs(sq[2 * i * 8 + 7])
         );
-        println!("{}{}{}{}{}{}{}{}",
+        println!("{}{}{}{}{}{}{}{}{}",
+            9 - (2 * i + 2),
             bs(sq[(2 * i + 1) * 8 + 0]),
             ws(sq[(2 * i + 1) * 8 + 1]),
             bs(sq[(2 * i + 1) * 8 + 2]),
@@ -150,6 +152,7 @@ fn print_squares(squares: [char; 64]) {
             ws(sq[(2 * i + 1) * 8 + 7])
         );
     }
+    println!(" ABCDEFGH");
 }
 
 fn ws(p: char) -> String {
