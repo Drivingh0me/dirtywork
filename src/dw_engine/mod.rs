@@ -123,9 +123,7 @@ pub fn dw_analysis(
         .board
         .last()
         .cloned()
-        .ok_or(
-        Error::VectorSize
-    )?;
+        .ok_or(Error::VectorSize)?;
 
     println!("ran analysis");
     Ok((best_move, eval))
@@ -146,8 +144,19 @@ fn evaluate_pos(state: &BoardState) -> f32 {
 }
 
 fn count_material(state: &BoardState) -> f32 {
-    let pawns = how_many(state.w_pawn) - how_many(state.b_pawn);
-    0.0
+    let p = how_many(state.w_pawn) - how_many(state.b_pawn);
+    let n = how_many(state.w_knight) - how_many(state.b_knight);
+    let b = how_many(state.w_bishop) - how_many(state.b_bishop);
+    let r = how_many(state.w_rook) - how_many(state.b_rook);
+    let q = how_many(state.w_queen) - how_many(state.b_queen);
+
+    let p = p as f32;
+    let n = n as f32;
+    let b = b as f32;
+    let r = r as f32;
+    let q = q as f32;
+
+    1.0 * p + 2.9 * n + 3.0 * b + 5.0 * r + 9.0 * q
 }
 
 fn how_many(p: Piece) -> u8 {
@@ -161,7 +170,7 @@ fn how_many(p: Piece) -> u8 {
 }
 
 fn measure_control(state: &BoardState) -> f32 {
-    
+    // Form a movemap for all 64 positions and xor the current map.
 
     0.0
 }
