@@ -1,4 +1,21 @@
 # import argparse
+import numpy as np
+
+class Piece:
+    def __init__(self, type):
+        self.type = type
+
+    def moves(self):
+        # Return the relative coords the piece can move.
+        # These are all possible moves under any circumstance.
+
+# Make a took kthat will construct rust arrays as text files with bitboards.
+def build_moveboard(piece):
+    # Determine the moves the piece can make and build the board.
+
+    # 2d array as board.
+    ranks, files = 8, 8
+    board = np.zeros((ranks, files))
 
 def main():
     # Let the user draw a board, and return coresponding u64.
