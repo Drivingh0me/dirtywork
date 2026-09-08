@@ -1,4 +1,5 @@
 mod mcmath;
+mod bitboards;
 
 use crate::error::{Result, Error};
 
