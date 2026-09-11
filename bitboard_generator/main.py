@@ -1,6 +1,9 @@
 # import argparse
 import numpy as np
 
+# Total number of moveboard pieces: 7
+# w_pawn, b_pawn, knight, bishop, rook, queen, king.
+
 # Staying in the current position is not an option.
 king_mobility = [
                           # Center.
@@ -89,15 +92,15 @@ knight_mobility = [
     [0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Center.
     [0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 ]
 
-pawn_mobility = [
+w_pawn_mobility = [
                           # Center.
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -116,7 +119,7 @@ pawn_mobility = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 ]
 
-pawn_mobility_first_move = [
+w_pawn_mobility_first_move = [
                           # Center.
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -135,15 +138,66 @@ pawn_mobility_first_move = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 ]
 
+b_pawn_mobility = [
+                          # Center.
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Center.
+    [0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+]
+
+b_pawn_mobility_first_move = [
+                          # Center.
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Center.
+    [0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+]
+
 class Piece:
-    def __init__(self, type):
+    def __init__(self, type: str, mobility):
         self.type = type
+        self.mobility = np.array(mobility)
 
-    def moves(self):
-        # Return the relative coords the piece can move.
-        # These are all possible moves under any circumstance.
+    def moves(self, position: int):
+        # Return 8 x 8 matrix of moves on the board.
+        if position >= 64:
+            raise ValueError("position cannot be greater than 63.")
 
-# Make a took kthat will construct rust arrays as text files with bitboards.
+        piece_location = (position % 8, position / 8) # (x, y)
+
+        row_start = 
+        row_end = 
+        col_start = 
+        col_end = 
+
+        out = self.mobility[row_start:row_end + 1, col_start:col_end + 1]
+
+        return out
+
+# Make a took that will construct rust arrays as text files with bitboards.
 def build_moveboard(piece):
     # Determine the moves the piece can make and build the board.
 
@@ -151,13 +205,10 @@ def build_moveboard(piece):
     ranks, files = 8, 8
     board = np.zeros((ranks, files))
 
-def main():
-    # Let the user draw a board, and return coresponding u64.
-    # parser = argparse.ArgumentParser()
-    # parser.add_argument("-type", help="bitboard type to construct", nargs='1')
-    # args = parser.parse_args()
-    # val: int = 0
+def bitboardstr_to_int(bitboard_str):
+    return int(bin, 2)
 
+def bitboard_from_user():
     print(" 12345678")
     h = input("H")
     g = input("G")
@@ -177,11 +228,15 @@ def main():
     b = b[::-1]
     a = a[::-1]
 
-    bin = h+g+f+e+d+c+b+a
-    val = int(bin, 2)
+    print(bitboardstr_to_int(h+g+f+e+d+c+b+a))
 
-    print(val)
 
+def main():
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument("-type", help="bitboard type to construct", nargs='1')
+    # args = parser.parse_args()
+    # val: int = 0
+    bitboard_from_user()
 
 if __name__ == "__main__":
     main()
