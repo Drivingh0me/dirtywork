@@ -1,4 +1,4 @@
-# import argparse
+import argparse
 import numpy as np
 
 # Total number of moveboard pieces: 7
@@ -176,37 +176,57 @@ b_pawn_mobility_first_move = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 ]
 
+# Capitol is white.
+pieces = ["P", "K", "B", "R", "Q", "K", "p", "k", "b", "r", "q", "k"]
+
+def bitboardstr_to_int(bitboard_str):
+    return int(bin, 2)
+
 class Piece:
-    def __init__(self, type: str, mobility):
+    def __init__(self, type: str):
         self.type = type
-        self.mobility = np.array(mobility)
+
+        match type:
+            case "P":
+                self.mobility = np.array(w_pawn_mobility)
+                self.mobility_fm = np.array(w_pawn_mobility_first_move)
 
     def moves(self, position: int):
         # Return 8 x 8 matrix of moves on the board.
         if position >= 64:
             raise ValueError("position cannot be greater than 63.")
 
-        piece_location = (position % 8, position / 8) # (x, y)
+        # Piece location on main 8x8 board.
+        piece_x = position % 8
+        piece_y = position / 8
 
-        row_start = 
-        row_end = 
-        col_start = 
-        col_end = 
+        # 0 indexed.
+        row = 7 - piece_y
+        col = 7 - piece_x
 
-        out = self.mobility[row_start:row_end + 1, col_start:col_end + 1]
+        out = self.mobility[row:row + 8, col:col + 8]
 
         return out
+
+def array_to_int(arr):
+    # Convert the board array to an int bitboard.
+    str_arr = arr.astype(str)
+    int_str = "".join(str_arr)
+    return bitboardstr_to_int(int_str)
 
 # Make a took that will construct rust arrays as text files with bitboards.
 def build_moveboard(piece):
     # Determine the moves the piece can make and build the board.
+    out = np.zeros(64)
 
-    # 2d array as board.
-    ranks, files = 8, 8
-    board = np.zeros((ranks, files))
+    for i in out:
+        # loop over all positions and add int bitboard to out.
+        out[i] = array_to_int(piece.moves(i))
 
-def bitboardstr_to_int(bitboard_str):
-    return int(bin, 2)
+    return out
+
+def make_bitboards():
+    # Make and export all bitboards to a txt file.
 
 def bitboard_from_user():
     print(" 12345678")
@@ -232,11 +252,16 @@ def bitboard_from_user():
 
 
 def main():
-    # parser = argparse.ArgumentParser()
-    # parser.add_argument("-type", help="bitboard type to construct", nargs='1')
-    # args = parser.parse_args()
-    # val: int = 0
-    bitboard_from_user()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-d", "--draw",
+        help="draw bitboard",
+        action="store_true")
+    args = parser.parse_args()
+
+    if args.draw:
+        bitboard_from_user()
+    else:
+        make_bitboards()
 
 if __name__ == "__main__":
     main()
