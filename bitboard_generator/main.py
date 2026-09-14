@@ -190,6 +190,41 @@ class Piece:
             case "P":
                 self.mobility = np.array(w_pawn_mobility)
                 self.mobility_fm = np.array(w_pawn_mobility_first_move)
+            case "N":
+                self.mobility = np.array(knight_mobility)
+                self.mobility_fm = False
+            case "B":
+                self.mobility = np.array(bishop_mobility)
+                self.mobility_fm = False
+            case "R":
+                self.mobility = np.array(rook_mobility)
+                self.mobility_fm = False
+            case "Q":
+                self.mobility = np.array(queen_mobility)
+                self.mobility_fm = False
+            case "K":
+                self.mobility = np.array(king_mobility)
+                self.mobility_fm = False
+            case "p":
+                self.mobility = np.array(b_pawn_mobility)
+                self.mobility_fm = np.array(b_pawn_mobility_first_move)
+            case "n":
+                self.mobility = np.array(night_mobility)
+                self.mobility_fm = False
+            case "b":
+                self.mobility = np.array(bishop_mobility)
+                self.mobility_fm = False
+            case "r":
+                self.mobility = np.array(rook_mobility)
+                self.mobility_fm = False
+            case "q":
+                self.mobility = np.array(queen_mobility)
+                self.mobility_fm = False
+            case "k":
+                self.mobility = np.array(king_mobility)
+                self.mobility_fm = False
+            case _:
+                raise ValueError("Invalid piece.")
 
     def moves(self, position: int):
         # Return 8 x 8 matrix of moves on the board.
@@ -203,6 +238,8 @@ class Piece:
         # 0 indexed.
         row = 7 - piece_y
         col = 7 - piece_x
+
+        # Add exception for pawns first move.
 
         out = self.mobility[row:row + 8, col:col + 8]
 
@@ -227,6 +264,8 @@ def build_moveboard(piece):
 
 def make_bitboards():
     # Make and export all bitboards to a txt file.
+    w_king = Piece("K")
+    print(build_moveboard(w_king))
 
 def bitboard_from_user():
     print(" 12345678")
