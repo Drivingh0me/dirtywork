@@ -179,8 +179,8 @@ b_pawn_mobility_first_move = [
 # Capitol is white.
 pieces = ["P", "K", "B", "R", "Q", "K", "p", "k", "b", "r", "q", "k"]
 
-def bitboardstr_to_int(bitboard_str):
-    return int(bin, 2)
+def bitboardstr_to_int(bits):
+    return int(bits, 2)
 
 class Piece:
     def __init__(self, type: str):
@@ -232,8 +232,8 @@ class Piece:
             raise ValueError("position cannot be greater than 63.")
 
         # Piece location on main 8x8 board.
-        piece_x = position % 8
-        piece_y = position / 8
+        piece_x = int(position % 8)
+        piece_y = int(position / 8)
 
         # 0 indexed.
         row = 7 - piece_y
@@ -247,20 +247,25 @@ class Piece:
 
 def array_to_int(arr):
     # Convert the board array to an int bitboard.
+    str_num = ""
     str_arr = arr.astype(str)
-    int_str = "".join(str_arr)
-    return bitboardstr_to_int(int_str)
+    print(np.array2string(str_arr, separator=''))
+    for x in np.nditer(str_arr):
+        str_num += x
+    print(str)
+    return bitboardstr_to_int(str_num)
 
 # Make a took that will construct rust arrays as text files with bitboards.
 def build_moveboard(piece):
     # Determine the moves the piece can make and build the board.
     out = np.zeros(64)
 
-    for i in out:
+    for i in range(64):
         # loop over all positions and add int bitboard to out.
         out[i] = array_to_int(piece.moves(i))
 
-    return out
+    # Reverse order to make index 0 -> 63
+    return np.flip(out)
 
 def make_bitboards():
     # Make and export all bitboards to a txt file.
