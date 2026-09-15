@@ -1,12 +1,7 @@
 use crate::dw_engine::BitBoard;
 
 // King movements
-pub const KING_MOVS: &[u64] = &[
-    0, 1, 2, 3, 4, 5, 6, 7, 8
+pub const KING_MOVS: [u64] = [include!(
+    "../../bitboard_generator/bitboards/k.txt"
+)];
 
-];
-
-// Import moveboards for each piece from bitboard generator.
-fn import_moveboards() -> MoveBoard {
-
-}
