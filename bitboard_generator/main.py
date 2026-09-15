@@ -267,11 +267,18 @@ def build_moveboard(piece):
     # Reverse order to make index 0 -> 63
     return np.flip(out)
 
+def nparr_to_string(arr):
+    out = ""
+    for i in arr:
+        out += f"{str(int(i))}, "
+
+    return out
+
 def make_bitboards():
     # Make and export all bitboards to a txt file.
     for p in pieces:
         with open(f"bitboards/{p}.txt", "w") as file:
-            file.write(np.array2string(build_moveboard(Piece(p))))
+            file.write(nparr_to_string(build_moveboard(Piece(p))))
 
 def bitboard_from_user():
     print(" 12345678")

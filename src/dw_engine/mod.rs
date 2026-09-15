@@ -143,6 +143,7 @@ pub fn dw_analysis(
     Ok((best_move, eval))
 }
 
+// Static evaluation.
 fn evaluate_pos(state: &BoardState) -> f32 {
     let material_weight: f32 = 0.5;
     let control_weight: f32 = 0.3;
@@ -153,6 +154,17 @@ fn evaluate_pos(state: &BoardState) -> f32 {
 
     let control = measure_control(&state);
     println!("control is: {}", control);
+
+    let agro = aggression(&state);
+    println!("aggression is: {}", agro);
+
+    (material_weight * material +
+    control_weight * control +
+    agro_weight * agro)
+}
+
+fn aggression(state: &BoardState) -> f32 {
+    // See how close the average piece is to the king.
 
     0.0
 }
