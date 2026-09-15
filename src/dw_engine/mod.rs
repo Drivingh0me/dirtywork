@@ -173,6 +173,7 @@ fn count_material(state: &BoardState) -> f32 {
     1.0 * p + 2.9 * n + 3.0 * b + 5.0 * r + 9.0 * q
 }
 
+// Calculates how many pieces there are.
 fn how_many(p: BitBoard) -> u8 {
     let mut bits = p.bits;
     let mut num: u8 = 0;
