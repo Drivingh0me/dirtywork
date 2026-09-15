@@ -176,8 +176,8 @@ b_pawn_mobility_first_move = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 ]
 
-# Capitol is white.
-pieces = ["P", "K", "B", "R", "Q", "K", "p", "k", "b", "r", "q", "k"]
+# bp is black pawn and wp is white pawn
+pieces = ["wp", "bp", "n", "b", "r", "q", "k"]
 
 def bitboardstr_to_int(bits):
     return int(bits, 2)
@@ -187,7 +187,7 @@ class Piece:
         self.type = type
 
         match type:
-            case "P":
+            case "wp":
                 self.mobility = np.array(w_pawn_mobility)
                 self.mobility_fm = np.array(w_pawn_mobility_first_move)
             case "N":
@@ -205,11 +205,11 @@ class Piece:
             case "K":
                 self.mobility = np.array(king_mobility)
                 self.mobility_fm = False
-            case "p":
+            case "bp":
                 self.mobility = np.array(b_pawn_mobility)
                 self.mobility_fm = np.array(b_pawn_mobility_first_move)
             case "n":
-                self.mobility = np.array(night_mobility)
+                self.mobility = np.array(knight_mobility)
                 self.mobility_fm = False
             case "b":
                 self.mobility = np.array(bishop_mobility)
@@ -249,10 +249,10 @@ def array_to_int(arr):
     # Convert the board array to an int bitboard.
     str_num = ""
     str_arr = arr.astype(str)
-    print(np.array2string(str_arr, separator=''))
+    # print(np.array2string(str_arr, separator=''))
     for x in np.nditer(str_arr):
         str_num += x
-    print(str)
+
     return bitboardstr_to_int(str_num)
 
 # Make a took that will construct rust arrays as text files with bitboards.
@@ -269,8 +269,9 @@ def build_moveboard(piece):
 
 def make_bitboards():
     # Make and export all bitboards to a txt file.
-    w_king = Piece("K")
-    print(build_moveboard(w_king))
+    for p in pieces:
+        with open(f"bitboards/{p}.txt", "w") as file:
+            file.write(np.array2string(build_moveboard(Piece(p))))
 
 def bitboard_from_user():
     print(" 12345678")
