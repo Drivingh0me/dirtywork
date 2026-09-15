@@ -1,7 +1,7 @@
 % Main Preamble
 
 \documentclass[12pt, letterpaper]{article}
-\title{Nucleofile Manual\\[0.12in] \large Version 0.1.1}
+\title{Dirtywork Manual\\[0.12in] \large Version 0.1.1}
 \author{Caleb Griffin}
 \date{June, 2026}
 
@@ -34,29 +34,37 @@
 \pagebreak
 
 \section{Introduction}
-Nucleofile is meant to serve as a general purpose software aid to chemists
-and all who need scientific programs. Nucleofile will always be free and
-and open source.
+Dirtywork is a chess engine that solves for a recommended move and an
+evaluation of the game in usits of pawns advantage.
 
 \section{User Guide}
-Nucleofile is designed to be flexible and work with you through many
-interfaces. The three primary ways to interact with nucleofile are
-with the GUI, TUI, and the interpreter. Project files are saved as ``.ncfl''
-extension. The app can also be controled through a script languaged called ``aangstrom'' which uses the ``.aang'' suffix for files.
+Dirtywork can be easily run in the terminal with flags.
 
 \subsection{Flags}
 \begin{itemize}
-\item -f/--file Pass a file or diretory to nucleofile.
+\item -f/--file Pass a game file to dirtywork.
 \item -d/--debug
-\item -g/--gui Open nucleofile without opening the GUI.
+\item -m/--memory Set the max memory dirtywork can request.
 \end{itemize}
 
 \subsection{TUI Guide}
-To use the TUI, open nucleofile with ``ncfl -t''.
+Simply run dirtywork to enter the TUI.
+
+\section{Algorithms}
+The algorithm used by dirtywork is temporal minmax eval, or ``TME''.
+
+\subsection{Depth}
+The depth parameter of TME sets how many times the algorithm is recursivly
+called. A higher depth is more expensive, but more accurate. If we call
+the depth parameter /textbf{n}, then we can derive the rest of the parameters
+from this \textbf{n}. The prune function removes the lowest eval move
+sequences and leave only the top 2 \+ 2\sqrt{n} sequences. Prune is called
+every \sqrt{n \+ n} moves.
 
 \section{Math}
-There are multiple constants used in nucleofile, these are stated here
- with bold script as textbf{constant}.
+Dirtywork uses bitboards to store piece locations. Bitboards ar 64 bit
+integers wher each bit coresponds to a square on the board. If the bit is
+zero, no peice is present, if the bit is 1, a piece is present at that square.
 
 \subsection{Determining the area under a function}
 If you want to determine \(\int_a^b x^2\,dx\) for your system.

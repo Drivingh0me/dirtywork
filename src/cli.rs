@@ -9,8 +9,9 @@ use crate::error::Result;
     version = "0.1.1",
     about = "dirtywork is a naive chess analysis engine.",
     long_about = "dirtywork uses brute force and intuition strategies\
-        to solve positions.")]
+        to analyze positions.")]
 struct Args {
+    // Not sure this is useful.
     #[arg(short, action = clap::ArgAction::SetTrue)]
     verbose: bool,
 
@@ -19,6 +20,10 @@ struct Args {
 
     #[arg(short)]
     file: Option<PathBuf>,
+
+    // Max memory in MB the engine can use.
+    #[arg(short, default_value_t = 512)]
+    memory: u32,
 
     /// Enters debug mode
     #[arg(short, value_name = "debug mode", action = clap::ArgAction::SetTrue)]
@@ -41,6 +46,7 @@ pub fn get_args() -> Result<Params>
         verbose: args.verbose,
         play: args.play,
         file: args.file,
+        memory: args.memory,
         debug: args.debug,
     })
 }

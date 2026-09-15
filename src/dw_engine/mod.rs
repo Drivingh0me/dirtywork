@@ -121,7 +121,7 @@ pub fn dw_analysis(
 ) -> Result<(BoardState, f32)> {
     println!("thinking...");
 
-    // Loop over this. ------
+    // Loop over this depth times. ------
     // Make a legal move.
     let pos_eval = evaluate_pos(state
         .board
@@ -139,7 +139,7 @@ pub fn dw_analysis(
         .cloned()
         .ok_or(Error::VectorSize)?;
 
-    println!("ran analysis");
+    println!("ran analysis!");
     Ok((best_move, eval))
 }
 
