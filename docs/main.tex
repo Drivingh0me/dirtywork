@@ -14,7 +14,8 @@
 	amsmath,
 	hyperref
 }
-\geometry{bottom=1.0in}
+\usepackage[default]{lato}
+\geometry{left= 0.5in, right=0.5in, top=0.5in, bottom=0.75in}
 
 \pagecolor{white}
 
@@ -56,10 +57,10 @@ The algorithm used by dirtywork is temporal minmax eval, or ``TME''.
 \subsection{Depth}
 The depth parameter of TME sets how many times the algorithm is recursivly
 called. A higher depth is more expensive, but more accurate. If we call
-the depth parameter /textbf{n}, then we can derive the rest of the parameters
+the depth parameter \textbf{n}, then we can derive the rest of the parameters
 from this \textbf{n}. The prune function removes the lowest eval move
-sequences and leave only the top 2 \+ 2\sqrt{n} sequences. Prune is called
-every \sqrt{n \+ n} moves.
+sequences and leave only the top \(2 + 2\sqrt{n}\) sequences. Prune is called
+every \(\sqrt{n + 2}\) moves.
 
 \section{Math}
 Dirtywork uses bitboards to store piece locations. Bitboards ar 64 bit
