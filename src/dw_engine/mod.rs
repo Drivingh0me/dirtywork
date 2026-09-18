@@ -258,3 +258,18 @@ fn get_bitboard(board: &BoardState, piece: &Piece) -> BitBoard {
     bitboard
 
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_rook_moves {
+    // Answer to rook moves.
+    let a = 
+
+    // Set b equal to rook position bitboard.
+    let mut b = 
+        assert_eq!(a, b);
+    }
+}
