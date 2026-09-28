@@ -1,7 +1,19 @@
+use supports_color::Stream;
+
 use crate::error::{Error, Result};
 
 use crate::dw_engine::{BoardState, Piece, Color};
 use crate::dw_engine::{get_piece_coords};
+
+// TODO: Check if terminal supports more colors then do better board
+//       colors than the universal colors. Default to universal colors.
+
+enum ColorDepth {
+    Millions,
+    Hundreds,
+    Sixteen,
+    No_Colors,
+}
 
 #[derive(Debug)]
 struct PrintableBoard {
@@ -36,6 +48,22 @@ impl PrintableBoard {
             b_king: get_piece_coords(&board, &Piece::King(Color::Black)),
         }
     }
+}
+
+//Check if termal supports more colors.
+fn color_support() -> ColorDepth {
+    if let Some(support) = supports_color::on(Stream::Stdout) {
+        if support.has_16m {
+            println!("16m (rgb) colors are supported");
+        } else if support.has_256 {
+            println!("256 bit colors are supported");
+        } else if support.has_basic {
+            println!("basic ANSI colors are supported");
+        } else {
+            println!("No colors supported");
+        }
+    }
+    ColorDepth::No_colors
 }
 
 pub fn print_board(board: BoardState) -> Result<()> {
