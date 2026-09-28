@@ -8,7 +8,6 @@ edition = "2024"
 clap = {version = "4.5", features = ["derive"]}
 thiserror = "2.0.18"
 bytemuck = "1.25.2"
-wgpu = "24.0"
 
 [profile.release]
 opt-level = "s"
