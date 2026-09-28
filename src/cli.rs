@@ -35,6 +35,7 @@ pub struct Params{
     pub verbose: bool,
     pub play: bool,
     pub file: Option<PathBuf>,
+    pub memory: u32,
     pub debug: bool,
 }
 

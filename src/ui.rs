@@ -63,7 +63,7 @@ fn color_support() -> ColorDepth {
             println!("No colors supported");
         }
     }
-    ColorDepth::No_colors
+    ColorDepth::No_Colors
 }
 
 pub fn print_board(board: BoardState) -> Result<()> {
