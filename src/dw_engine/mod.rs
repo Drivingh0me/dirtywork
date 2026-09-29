@@ -266,7 +266,9 @@ mod tests {
     #[test]
     fn test_rook_moves() {
     // Answer to rook on G2 moves.
-    let a: u64 = 215893514783949314;
+    let r: u64 = 215893514783949314;
+
+    let a: u64 = r;
 
     // Set b equal to rook on G2 bitboard.
     let mut b = 562949953421312;
