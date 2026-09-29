@@ -1,5 +1,7 @@
 mod mcmath;
 mod bitboards;
+mod magic;
+pub use magic::initialize_magic;
 
 use crate::error::{Result, Error};
 
@@ -46,6 +48,7 @@ pub struct BoardState {
     b_queen: BitBoard,
     b_king: BitBoard,
     // Pawn that moved two squares in the previous turn.
+    // Needs to leave behind a crumb as well.
     dbl_pawn: BitBoard,
 }
 

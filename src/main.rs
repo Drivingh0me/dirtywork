@@ -16,6 +16,7 @@ fn main() -> Result<()> {
 
 fn run_app(args: cli::Params) -> Result<()> {
     let game = dw_engine::GameState::default();
+    let magic = dw_engine::initialize_magic();
     let (best_move, eval) = dw_engine::dw_analysis(game, 5)?;
     println!("eval: {}", eval);
     // dbg!(best_move);

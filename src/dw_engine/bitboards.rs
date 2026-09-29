@@ -1,5 +1,5 @@
 use crate::dw_engine::BitBoard;
-// TODO: Make sure brackets are in text file "[1, 2, 3, 4]"
+// TODO: Convert u64 moveboards to BitBoard moveboards.
 
 // For pawn, mut leave a "crumb" behind if moved 2 spaces on first move so
 // that another pawn can au-passant to capture.
