@@ -1,4 +1,5 @@
 use crate::dw_engine::BitBoard;
+use std::collections::HashSet;
 
 // Should be 64 magic rook numbers and 64 magic bishop numbers.
 
@@ -47,6 +48,27 @@ pub(crate) fn cast_spell(
     ((blocker_board.bits as u128 * magic_number.bits as u128) >> 64) as usize
 }
 
-fn is_magic(candidate: BitBoard) -> bool {
-    false
+// Returns a magic number.
+// May be best to make the indexed moveboard while doing this.
+fn find_magic(
+    blocker_boards: &Vec<BitBoard>,
+    move_boards: &Vec<BitBoard>
+) -> BitBoard {
+    let mut candidate: u64 = 0;
+    loop {
+        candidate = rand::random::<u64>();
+        let mut indexes = HashSet::new();
+        for blockers in blocker_boards {
+            let index = cast_spell(blockers, candidate);
+            if !indexes.insert(index) {
+                // i is index of this blockerboard and j is index of previous
+                // blockerboard with same index from magic.
+                if move_boards[i] != move_boards[j] {
+                    continue;
+                }
+            }
+        }
+        break;
+    }
+    candidate
 }
