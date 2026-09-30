@@ -4,7 +4,7 @@ use crate::dw_engine::BitBoard;
 // For pawn, mut leave a "crumb" behind if moved 2 spaces on first move so
 // that another pawn can au-passant to capture.
 
-// King movements
+// Hopping piece movements.
 pub const K_MOVS: [u64; 64] = include!(
     "../../bitboard_generator/bitboards/k.txt"
 );
@@ -27,4 +27,13 @@ pub const WP_CAPT: [u64; 64] = include!(
 
 pub const BP_CAPT: [u64; 64] = include!(
     "../../bitboard_generator/bitboards/bpc.txt"
+);
+
+// Blocker masks.
+pub const R_MASK: [u64; 64] = include!(
+    "../../bitboard_generator/bitboards/r.txt"
+);
+
+pub const B_MASK: [u64; 64] = include!(
+    "../../bitboard_generator/bitboards/b.txt"
 );

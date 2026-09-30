@@ -10,8 +10,8 @@ use std::collections::HashSet;
 pub(crate) struct PieceMagic {
     move_boards: [Vec<BitBoard>; 64],
     blocker_boards: [Vec<BitBoard>; 64],
-    blocker_masks: [BitBoard; 64], // For each square.
-    magic_numbers: [BitBoard; 64],
+    blocker_masks: [u64; 64], // For each square.
+    magic_numbers: [u64; 64], // For each square.
 }
 
 pub struct Magic {
@@ -47,9 +47,9 @@ pub fn initialize_magic() -> Magic {
 // Should return a unique index of moveboards for any blockerboard.
 pub(crate) fn cast_spell(
     blocker_board: BitBoard,
-    magic_number: BitBoard
+    magic_number: u64
 ) -> usize {
-    ((blocker_board.bits as u128 * magic_number.bits as u128) >> 64) as usize
+    ((blocker_board.bits as u128 * magic_number as u128) >> 64) as usize
 }
 
 // Returns a magic number.
