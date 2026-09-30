@@ -1,7 +1,11 @@
 use crate::dw_engine::BitBoard;
 use std::collections::HashSet;
 
+// Notes ----------------------------------------------------------------------
 // Should be 64 magic rook numbers and 64 magic bishop numbers.
+// ----------------------------------------------------------------------------
+
+// Import blocker_masks from bitboard generator.
 
 pub(crate) struct PieceMagic {
     move_boards: [Vec<BitBoard>; 64],
@@ -54,12 +58,12 @@ fn find_magic(
     blocker_boards: &Vec<BitBoard>,
     move_boards: &Vec<BitBoard>
 ) -> BitBoard {
-    let mut candidate: u64 = 0;
+    let mut candidate = BitBoard::new();
     loop {
-        candidate = rand::random::<u64>();
+        candidate.bits = rand::random::<u64>();
         let mut indexes = HashSet::new();
         for blockers in blocker_boards {
-            let index = cast_spell(blockers, candidate);
+            let index = cast_spell(*blockers, candidate);
             if !indexes.insert(index) {
                 // i is index of this blockerboard and j is index of previous
                 // blockerboard with same index from magic.

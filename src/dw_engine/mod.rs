@@ -32,6 +32,12 @@ pub struct BitBoard {
     bits: u64,
 }
 
+impl BitBoard {
+    fn new() -> Self {
+        Self { bits: 0 }
+    }
+}
+
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub struct BoardState {
     tomove: Color,
