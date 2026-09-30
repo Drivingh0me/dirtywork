@@ -1,9 +1,6 @@
 import argparse
 import numpy as np
 
-# Total number of moveboard pieces: 7
-# w_pawn, b_pawn, knight, bishop, rook, queen, king.
-
 # Staying in the current position is not an option.
 king_mobility = [
                           # Center.
@@ -22,6 +19,44 @@ king_mobility = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+]
+
+rook_mobility = [
+                          # Center.
+    [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+    [1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1], # Center.
+    [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0]
+]
+
+bishop_mobility = [
+                          # Center.
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+    [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+    [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+    [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Center.
+    [0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+    [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+    [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+    [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]
 ]
 
 knight_mobility = [
@@ -158,7 +193,7 @@ b_pawn_capture = [
 ]
 
 # bp is black pawn and wp is white pawn, c is capture.
-pieces = ["wp", "bp", "n", "wpc", "bpc", "k"]
+pieces = ["wp", "bp", "wpc", "bpc", "n", "b", "r", "k"]
 
 def bitboardstr_to_int(bits):
     return int(bits, 2)
@@ -183,6 +218,12 @@ class Piece:
             case "bpc":
                 self.mobility = np.array(b_pawn_capture)
                 self.mobility_fm = False
+            case "b":
+                self.mobility = np.array(bishop_mobility)
+                self.mobility_fm = False
+            case "r":
+                self.mobility = np.array(rook_mobility)
+                self.mobility_fm = False
             case "k":
                 self.mobility = np.array(king_mobility)
                 self.mobility_fm = False
@@ -198,14 +239,44 @@ class Piece:
         piece_x = int(position % 8)
         piece_y = int(position / 8)
 
-        # 0 indexed.
+        # 0 indexed position of movement matrix.
         row = 7 - piece_y
         col = 7 - piece_x
 
-        # Add exception for pawns first move.
+        # Edges to set to zero
+        left = True
+        right = True
+        top = True
+        bottom = True
 
-        out = self.mobility[row:row + 8, col:col + 8]
+        # Check if piece is on edge and stop wiping to zero
+        if piece_x == 0:
+            left = False
+        if piece_x == 7:
+            right = False
+        if piece_y == 7:
+            top = False
+        if piece_y == 0:
+            bottom = False
 
+        # TODO: Add exception for pawns first move.
+
+        out = self.mobility.copy()
+
+        out = out[row:row + 8, col:col + 8]
+
+        # If bishop or rook, remove the edges the piece is not touching.
+        if self.type == "b" or self.type == "r":
+            # Set edges to 0 if not on that edge.
+            if left:
+                out[:, 0] = 0
+            if right:
+                out[:, 7] = 0
+            if top:
+                out[7, :] = 0
+            if bottom:
+                out[0, :] = 0
+            print(out)
         return out
 
 def array_to_int(arr):
