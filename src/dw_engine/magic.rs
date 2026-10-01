@@ -68,12 +68,46 @@ pub(crate) fn cast_spell(
     ((blocker_board.bits * magic_number) >> (64 - blockers)) as usize
 }
 
-fn build_blockers_and_moves(
-    piece: SliderType,
-    blocker_boards: &mut Vec<BitBoard>,
-    move_boards: &mut Vec<BitBoard>,
-) {
+enum SquareOccupancy {
+    blocker,
+    myself,
+    empty,
+}
 
+pub(crate) struct MtxBoard {
+    // board is always 64 elems and represents an 8x8 board.
+    board: Vec<SquareOccupancy>,
+}
+
+impl MtxBoard {
+    fn new() -> Self {
+        Self {
+            board: vec![SquareOccupancy::empty; 64]
+        }
+    }
+}
+
+pub(crate) fn blockerboard_to_mtxboard(
+    bb: BitBoard,
+    piece: SliderType,
+    square: u32
+) -> MtxBoard {
+    l
+}
+
+// Builds all permutations of the blockers for a square.
+fn build_blockers(blocker_mask: BitBoard) -> Vec<BitBoard> {
+}
+
+fn build_moveboard(
+    piece: SliderType,
+    blocker_board: BitBoard,
+    square: u32
+) -> BitBoard {
+    // Convert blockerboard to MtxBoard.
+    // Add piece's location to MtxBoard.
+    // Find all squares the piece can move to or capture on.
+    // Convert that MtxBoard to BitBoard.
 }
 
 // Returns a magic number.
@@ -127,5 +161,9 @@ pub fn find_magic(
 
 // Searches for magic numbers and records them in a file.
 pub fn search_magic() {
-    println!("Finding Magic!");
+    println!("Finding Magic...");
+    // Open magic/magic.txt, were best magics so far are stored.
+    // best magic/best_magic.txt is where the lengths are stored.
+
+    println!("Done!");
 }

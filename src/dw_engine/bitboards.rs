@@ -37,3 +37,4 @@ pub const R_MASK: [u64; 64] = include!(
 pub const B_MASK: [u64; 64] = include!(
     "../../bitboard_generator/bitboards/b.txt"
 );
+
