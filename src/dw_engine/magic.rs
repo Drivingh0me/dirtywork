@@ -68,10 +68,11 @@ pub(crate) fn cast_spell(
     ((blocker_board.bits * magic_number) >> (64 - blockers)) as usize
 }
 
+#[derive(Copy, Clone)]
 enum SquareOccupancy {
-    blocker,
-    myself,
-    empty,
+    Blocker,
+    Myself,
+    Empty,
 }
 
 pub(crate) struct MtxBoard {
@@ -82,32 +83,93 @@ pub(crate) struct MtxBoard {
 impl MtxBoard {
     fn new() -> Self {
         Self {
-            board: vec![SquareOccupancy::empty; 64]
+            board: vec![SquareOccupancy::Empty; 64]
         }
+    }
+
+    fn set(&mut self, square: usize, occ: SquareOccupancy) -> Result<()> {
+        match self.board.get_mut(square) {
+            Some(occupancy) => *occupancy = occ,
+            None => return Err(Error::VectorSize),
+        }
+        false
+    }
+
+    fn see(&self, location: bitboards::Location) -> Result<SquareOccupancy> {
+        let index = location.x + location.y * 8;
+        if index > 63 {
+            return Err(Error:VectorSize);
+        }
+        self.board.get(index).ok_or(Error::VectorSize)?
+    }
+
+    fn moves(&mut self, piece: SliderType, square: usize) {
+        let piece_location = bitboard::location(square);
+        // Determine loop sizes for cardinal directions.
+        let north = 8-piece_location.y;
+        let south = piece_location.y;
+        let east = 8-piece_location.x;
+        let west = piece_location.x;
+
+        // Scan directions using movement algo for correct piece.
+        match piece {
+            SliderType::rook => {
+                for i in 0..north {
+                    let location = piece_location.copy();
+                    location.y = location.y + i;
+                    match self.see(location)? {
+                        SquareOccupancy::Empty => ,
+                        SquareOccupancy::Blocker => ,
+                        SquareOccupancy::Myself => ,
+                    }
+                }
+            },
+            SliderType::bishop => {
+                a
+            }
+        }
+    }
+
+    fn to_bitboard(&self) -> Bitboard {
+        a
     }
 }
 
 pub(crate) fn blockerboard_to_mtxboard(
-    bb: BitBoard,
-    piece: SliderType,
-    square: u32
-) -> MtxBoard {
-    l
+    blockerboard: BitBoard
+) -> Result<MtxBoard> {
+    let mut out = MtxBoard::new();
+    let mut bb = blockerboard.bits;
+
+    while bb != 0 {
+        let square = bb.trailing_zeros() as usize;
+        out.set(square, SquareOccupancy::Blocker)?;
+        bb &= bb - 1;
+    }
+
+    Ok(out)
 }
 
 // Builds all permutations of the blockers for a square.
 fn build_blockers(blocker_mask: BitBoard) -> Vec<BitBoard> {
+    let mut out = Vec::new();
+
+    out
 }
 
 fn build_moveboard(
     piece: SliderType,
     blocker_board: BitBoard,
-    square: u32
+    square: usize
 ) -> BitBoard {
     // Convert blockerboard to MtxBoard.
-    // Add piece's location to MtxBoard.
+    let mut board = blockerboard_to_mtxboard(blocker_board);
+
     // Find all squares the piece can move to or capture on.
+    board.moves(piece, square);
+
     // Convert that MtxBoard to BitBoard.
+    board.to_bitboard()
 }
 
 // Returns a magic number.
@@ -119,6 +181,8 @@ pub fn find_magic(
 ) -> Result<(u64, Vec<BitBoard>)> {
     // Candidate magic number.
     let mut candidate:u64 = 0;
+
+    let max_size = 10_000;
 
     // cast_spell(blockers) is index in magic_movebards of moveboard.
     let mut magic_moveboards: Vec<BitBoard> = Vec::new();
@@ -137,6 +201,9 @@ pub fn find_magic(
                 .ok_or(Error::VectorSize)?;
             let num_of_blockers: u32 = blockers.bits.count_ones();
             let index = cast_spell(blockers, candidate, num_of_blockers);
+            if index > max_size {
+                continue 'search;
+            }
 
             // Resize magic_moveboards if necessary.
             magic_moveboards.resize(index, BitBoard::new());

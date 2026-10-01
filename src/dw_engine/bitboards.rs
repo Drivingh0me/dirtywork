@@ -38,3 +38,14 @@ pub const B_MASK: [u64; 64] = include!(
     "../../bitboard_generator/bitboards/b.txt"
 );
 
+pub(crate) struct Location {
+    pub x: usize,
+    pub y: usize,
+}
+
+pub(crate) fn location(square: usize) -> Location {
+    let x = square % 8;
+    let y = square / 8;
+    let out: Location = Location { x: x, y: y };
+    out
+}
