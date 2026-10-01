@@ -2,6 +2,7 @@ mod mcmath;
 mod bitboards;
 mod magic;
 pub use magic::initialize_magic;
+pub use magic::search_magic;
 
 use crate::error::{Result, Error};
 
@@ -35,6 +36,10 @@ pub struct BitBoard {
 impl BitBoard {
     fn new() -> Self {
         Self { bits: 0 }
+    }
+
+    fn set_val(val: u64) -> Self {
+        Self { bits: val }
     }
 }
 
@@ -195,14 +200,15 @@ fn count_material(state: &BoardState) -> f32 {
 }
 
 // Calculates how many pieces there are.
-fn how_many(p: BitBoard) -> u8 {
-    let mut bits = p.bits;
-    let mut num: u8 = 0;
-    while bits != 0 {
-        bits &= bits - 1;
-        num += 1;
-    }
-    num
+fn how_many(piece: BitBoard) -> u32 {
+    // let mut bits = p.bits;
+    // let mut num: u8 = 0;
+    // while bits != 0 {
+    //     bits &= bits - 1;
+    //     num += 1;
+    // }
+    // num
+    piece.bits.count_ones()
 }
 
 fn measure_control(state: &BoardState) -> f32 {
