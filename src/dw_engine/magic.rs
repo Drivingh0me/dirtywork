@@ -329,16 +329,21 @@ pub fn find_magic(
     // Candidate magic number.
     let mut candidate:u64 = 0;
 
-    let max_size = 10_000;
+    let num_of_blockers: u32 = blocker_mask.count_ones();
+
+    let table_size = 1usize << num_of_blockers;
 
     // cast_spell(blockers) is index in magic_movebards of moveboard.
-    let mut magic_moveboards: Vec<BitBoard> = Vec::new();
+    let mut magic_moveboards = Vec::new();
 
     'search: loop {
-        candidate = rand::random::<u64>();
-        candidate = candidate & rand::random::<u64>();
-        candidate = candidate & rand::random::<u64>();
-        let mut indexes = HashSet::new();
+        magic_moveboards = vec![BitBoard::new(); table_size];
+
+        candidate = rand::random::<u64>()
+            & rand::random::<u64>()
+            & rand::random::<u64>();
+
+        let mut used = vec![false; table_size];
         for i in 0..blocker_boards.len() {
             let blockers: BitBoard = *blocker_boards
                 .get(i)
@@ -348,29 +353,42 @@ pub fn find_magic(
                 .get(i)
                 .ok_or(Error::ItemNotFound(String::from(
                     "moveboard in moveboards")))?;
-            let num_of_blockers: u32 = blockers.bits.count_ones();
             let index = cast_spell(blockers, candidate, num_of_blockers);
-            if index > max_size {
-                continue 'search;
-            }
 
-            // Resize magic_moveboards if necessary.
-            magic_moveboards.resize(index + 1, BitBoard::new());
-
-            if !indexes.insert(index) {
-                if magic_moveboards.get(index)
-                    .ok_or(Error::ItemNotFound(String::from(
-                        "magic moveboard at index")))?
-                .bits != moveboard.bits {
+            if used[index] {
+                if magic_moveboards[index].bits != moveboard.bits {
                     continue 'search;
                 }
             } else {
+                match used.get_mut(index) {
+                    Some(elem) => *elem = true,
+                    None => return Err(Error::FailedMutate(String::from(
+                        "used magic indexes at index"))),
+                }
                 match magic_moveboards.get_mut(index) {
                     Some(elem) => *elem = moveboard,
                     None => return Err(Error::FailedMutate(String::from(
-                        "magic moveboards at index"))),
+                        "magic_bitboards at index"))),
                 }
             }
+
+            // // Resize magic_moveboards if necessary.
+            // magic_moveboards.resize(index + 1, BitBoard::new());
+            //
+            // if !indexes.insert(index) {
+            //     if magic_moveboards.get(index)
+            //         .ok_or(Error::ItemNotFound(String::from(
+            //             "magic moveboard at index")))?
+            //     .bits != moveboard.bits {
+            //         continue 'search;
+            //     }
+            // } else {
+            //     match magic_moveboards.get_mut(index) {
+            //         Some(elem) => *elem = moveboard,
+            //         None => return Err(Error::FailedMutate(String::from(
+            //             "magic moveboards at index"))),
+            //     }
+            // }
         }
         break;
     }
