@@ -159,6 +159,11 @@ impl MtxBoard {
         let east = 8-piece_location.x;
         let west = piece_location.x;
 
+        let nw = std::cmp::min(north, west);
+        let ne = std::cmp::min(north, east);
+        let sw = std::cmp::min(south, west);
+        let se = std::cmp::min(south, east);
+
         // Scan directions using movement algorithm for correct piece.
         match piece {
             Slider::rook => {
@@ -195,9 +200,42 @@ impl MtxBoard {
                     west)?;
             },
             Slider::bishop => {
-                // Calculate nw, ne, sw, se.
-                ()
-            }
+                // NorthWest.
+                self.step(|mut loc, i| {
+                        loc.y += i;
+                        loc.x -= i;
+                        loc
+                    },
+                    piece_location,
+                    nw)?;
+
+                // NorthEast.
+                self.step(|mut loc, i| {
+                        loc.y += i;
+                        loc.x += i;
+                        loc
+                    },
+                    piece_location,
+                    ne)?;
+
+                // SouthWest.
+                self.step(|mut loc, i| {
+                        loc.y -= i;
+                        loc.x -= i;
+                        loc
+                    },
+                    piece_location,
+                    sw)?;
+
+                // SouthEast.
+                self.step(|mut loc, i| {
+                        loc.y -= i;
+                        loc.x += i;
+                        loc
+                    },
+                    piece_location,
+                    se)?;
+            },
         }
 
         Ok(())
@@ -358,13 +396,40 @@ pub fn search_magic(magic: Magic) {
             moves.push(moveboard);
         }
 
-        let magic_tuple = find_magic(
+        let (magic_number, magic_moves) = find_magic(
             &blockers,
             &moves,
             mask.bits
         ).unwrap();
-        let magic_number = magic_tuple.0;
-        let magic_moves = magic_tuple.1;
+        // let magic_number = magic_tuple.0;
+        // let magic_moves = magic_tuple.1;
+
+        println!("magic number is: {} for square: {}", magic_number, square);
+    }
+
+    for square in 0.. 64 {
+        // Generate bitboards for this square.
+        let mask = BitBoard::set_val(magic.bishop.blocker_masks[square]);
+        let blockers = build_blockers(mask);
+        let mut moves = Vec::new();
+
+        for blocker_set in &blockers {
+            // println!("Searching next blockers");
+            let moveboard = build_moveboard(
+                Slider::bishop,
+                *blocker_set,
+                square
+            ).unwrap();
+            moves.push(moveboard);
+        }
+
+        let (magic_number, magic_moves) = find_magic(
+            &blockers,
+            &moves,
+            mask.bits
+        ).unwrap();
+        // let magic_number = magic_tuple.0;
+        // let magic_moves = magic_tuple.1;
 
         println!("magic number is: {} for square: {}", magic_number, square);
     }

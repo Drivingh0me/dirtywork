@@ -292,7 +292,7 @@ def array_to_int(arr):
 # Make a took that will construct rust arrays as text files with bitboards.
 def build_moveboard(piece):
     # Determine the moves the piece can make and build the board.
-    out = np.zeros(64)
+    out = np.zeros(64, dtype=np.uint64)
 
     for i in range(64):
         # loop over all positions and add int bitboard to out.
