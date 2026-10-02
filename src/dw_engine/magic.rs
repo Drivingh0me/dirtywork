@@ -65,7 +65,8 @@ pub(crate) fn cast_spell(
     magic_number: u64,
     blockers: u32,
 ) -> usize {
-    ((blocker_board.bits * magic_number) >> (64 - blockers)) as usize
+    let bb = blocker_board.bits;
+    ((bb.wrapping_mul(magic_number)) >> (64 - blockers)) as usize
 }
 
 #[derive(Copy, Clone)]
@@ -102,17 +103,19 @@ impl MtxBoard {
     }
 
     fn print(&self) {
-        for row in 7..=0 {
+        for row in (0..8).rev() {
+            let mut a = Vec::new();
             for col in 0..8 {
                 let location = bitboards::Location{ x: col, y: row };
                 let occupancy = self.see(location).unwrap();
                 let occ = match occupancy {
-                    SquareOccupancy::Myself => "1",
+                    SquareOccupancy::Blocker => "1",
                     _ => "0",
                 };
-                print!("{}", occ);
+                a.push(occ);
             }
-            print!("\n");
+            println!("{}{}{}{}{}{}{}{}",
+                a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7]);
         }
     }
 
@@ -125,14 +128,13 @@ impl MtxBoard {
         let west = piece_location.x;
 
         // Debugging
-        self.print();
-        println!("piece location: {},{}", piece_location.x, piece_location.y);
-        println!("n: {}, e: {}, s: {}, w: {}", north, east, south, west);
+        // println!("piece location: {},{}", piece_location.x, piece_location.y);
+        // println!("n: {}, e: {}, s: {}, w: {}", north, east, south, west);
 
         // Scan directions using movement algorithm for correct piece.
         match piece {
             Slider::rook => {
-                for i in 0..north {
+                for i in 1..north {
                     let mut location = piece_location;
                     location.y = location.y + i;
                     match self.see(location)? {
@@ -156,10 +158,10 @@ impl MtxBoard {
                             ));
                         },
                     }
-                    println!("north search proceeded to {}", i);
+                    // println!("north searched iteration {}", i);
                 }
 
-                for i in 0..south {
+                for i in 1..south {
                     let mut location = piece_location;
                     location.y = location.y - i;
                     match self.see(location)? {
@@ -183,10 +185,10 @@ impl MtxBoard {
                             ));
                         },
                     }
-                    println!("south search proceeded to {}", i);
+                    // println!("south search proceeded to {}", i);
                 }
 
-                for i in 0..east {
+                for i in 1..east {
                     let mut location = piece_location;
                     location.x = location.x + i;
                     match self.see(location)? {
@@ -210,10 +212,10 @@ impl MtxBoard {
                             ));
                         },
                     }
-                    println!("east search proceeded to {}", i);
+                    // println!("east search proceeded to {}", i);
                 }
 
-                for i in 0..west {
+                for i in 1..west {
                     let mut location = piece_location;
                     location.x = location.x - i;
                     match self.see(location)? {
@@ -237,7 +239,7 @@ impl MtxBoard {
                             ));
                         },
                     }
-                    println!("west search proceeded to {}", i);
+                    // println!("west search proceeded to {}", i);
                 }
             },
             Slider::bishop => {
@@ -307,6 +309,9 @@ fn build_moveboard(
     // Convert blockerboard to MtxBoard.
     let mut board = blockerboard_to_mtxboard(blocker_board)?;
 
+    // Debug.
+    // board.print();
+
     // Find all squares the piece can move to or capture on.
     board.moves(piece, square)?;
 
@@ -337,10 +342,12 @@ pub fn find_magic(
         for i in 0..blocker_boards.len() {
             let blockers: BitBoard = *blocker_boards
                 .get(i)
-                .ok_or(Error::VectorSize)?;
+                .ok_or(Error::ItemNotFound(String::from(
+                    "blockerboard in blockerboards")))?;
             let moveboard: BitBoard = *move_boards
                 .get(i)
-                .ok_or(Error::VectorSize)?;
+                .ok_or(Error::ItemNotFound(String::from(
+                    "moveboard in moveboards")))?;
             let num_of_blockers: u32 = blockers.bits.count_ones();
             let index = cast_spell(blockers, candidate, num_of_blockers);
             if index > max_size {
@@ -348,17 +355,20 @@ pub fn find_magic(
             }
 
             // Resize magic_moveboards if necessary.
-            magic_moveboards.resize(index, BitBoard::new());
+            magic_moveboards.resize(index + 1, BitBoard::new());
 
             if !indexes.insert(index) {
                 if magic_moveboards.get(index)
-                    .ok_or(Error::VectorSize)?.bits != moveboard.bits {
+                    .ok_or(Error::ItemNotFound(String::from(
+                        "magic moveboard at index")))?
+                .bits != moveboard.bits {
                     continue 'search;
                 }
             } else {
                 match magic_moveboards.get_mut(index) {
                     Some(elem) => *elem = moveboard,
-                    None => return Err(Error::VectorSize),
+                    None => return Err(Error::FailedMutate(String::from(
+                        "magic moveboards at index"))),
                 }
             }
         }
@@ -382,7 +392,7 @@ pub fn search_magic(magic: Magic) {
         let mut moves = Vec::new();
 
         for blocker_set in &blockers {
-            println!("Searching next blockers");
+            // println!("Searching next blockers");
             let moveboard = build_moveboard(
                 Slider::rook,
                 *blocker_set,

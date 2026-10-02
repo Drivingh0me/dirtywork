@@ -20,6 +20,8 @@ pub enum Error {
     MtxBounds,
     #[error("Item Not Found")]
     ItemNotFound(String),
+    #[error("Unable To Mutate")]
+    FailedMutate(String),
     #[error("Search Collided With Self")]
     Collision(String),
 }
