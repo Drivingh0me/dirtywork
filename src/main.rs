@@ -19,9 +19,10 @@ fn main() -> Result<()> {
 fn run_app(args: cli::Args) -> Result<()> {
     let game = dw_engine::GameState::default();
     let magic = dw_engine::initialize_magic();
+
     if args.search {
         println!("start time: {}", Local::now());
-        dw_engine::search_magic();
+        dw_engine::search_magic(magic);
         println!("end time: {}", Local::now());
     } else {
         let (best_move, eval) = dw_engine::dw_analysis(game, 5)?;
@@ -29,5 +30,6 @@ fn run_app(args: cli::Args) -> Result<()> {
         // dbg!(best_move);
         ui::print_board(best_move)?;
     }
+
     Ok(())
 }

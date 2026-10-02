@@ -1,4 +1,6 @@
 use crate::dw_engine::BitBoard;
+use crate::error::{Result, Error};
+
 // TODO: Convert u64 moveboards to BitBoard moveboards.
 
 // For pawn, mut leave a "crumb" behind if moved 2 spaces on first move so
@@ -38,9 +40,21 @@ pub const B_MASK: [u64; 64] = include!(
     "../../bitboard_generator/bitboards/b.txt"
 );
 
+#[derive(Clone, Copy)]
 pub(crate) struct Location {
     pub x: usize,
     pub y: usize,
+}
+
+impl Location {
+    pub(crate) fn square(self) -> Result<usize> {
+        let out: usize = self.x + self.y *8;
+        if out > 63 {
+            return Err(Error::VectorSize);
+        }
+
+        Ok(out)
+    }
 }
 
 pub(crate) fn location(square: usize) -> Location {

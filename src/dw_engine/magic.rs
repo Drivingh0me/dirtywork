@@ -12,7 +12,7 @@ use crate::dw_engine::bitboards;
 
 // Import blocker_masks from bitboard generator.
 
-enum SliderType {
+enum Slider {
     bishop,
     rook,
 }
@@ -22,7 +22,7 @@ pub(crate) struct PieceMagic {
     blocker_boards: [Vec<BitBoard>; 64],
     blocker_masks: [u64; 64], // For each square.
     magic_numbers: [u64; 64], // For each square.
-    slider: SliderType,
+    slider: Slider,
 }
 
 pub struct Magic {
@@ -33,20 +33,20 @@ pub struct Magic {
 impl Magic {
     fn new() -> Self {
         Self {
-            bishop: PieceMagic::new(SliderType::bishop),
-            rook: PieceMagic::new(SliderType::rook),
+            bishop: PieceMagic::new(Slider::bishop),
+            rook: PieceMagic::new(Slider::rook),
         }
     }
 }
 
 impl PieceMagic {
-    fn new(slider: SliderType) -> Self {
+    fn new(slider: Slider) -> Self {
         Self {
             move_boards: std::array::from_fn(|_| Vec::new()),
             blocker_boards: std::array::from_fn(|_| Vec::new()),
             blocker_masks: match slider {
-                SliderType::bishop => bitboards::B_MASK,
-                SliderType::rook => bitboards::R_MASK,
+                Slider::bishop => bitboards::B_MASK,
+                Slider::rook => bitboards::R_MASK,
             },
             magic_numbers: [0u64; 64],
             slider: slider,
@@ -92,46 +92,153 @@ impl MtxBoard {
             Some(occupancy) => *occupancy = occ,
             None => return Err(Error::VectorSize),
         }
-        false
+        Ok(())
     }
 
     fn see(&self, location: bitboards::Location) -> Result<SquareOccupancy> {
-        let index = location.x + location.y * 8;
-        if index > 63 {
-            return Err(Error:VectorSize);
-        }
-        self.board.get(index).ok_or(Error::VectorSize)?
+        let index = location.square()?;
+
+        self.board.get(index).ok_or(Error::VectorSize).copied()
     }
 
-    fn moves(&mut self, piece: SliderType, square: usize) {
-        let piece_location = bitboard::location(square);
+    fn moves(&mut self, piece: Slider, square: usize) -> Result<()> {
+        let piece_location = bitboards::location(square);
         // Determine loop sizes for cardinal directions.
         let north = 8-piece_location.y;
         let south = piece_location.y;
         let east = 8-piece_location.x;
         let west = piece_location.x;
 
-        // Scan directions using movement algo for correct piece.
+        // Scan directions using movement algorithm for correct piece.
         match piece {
-            SliderType::rook => {
+            Slider::rook => {
                 for i in 0..north {
-                    let location = piece_location.copy();
+                    let mut location = piece_location;
                     location.y = location.y + i;
                     match self.see(location)? {
-                        SquareOccupancy::Empty => ,
-                        SquareOccupancy::Blocker => ,
-                        SquareOccupancy::Myself => ,
+                        SquareOccupancy::Empty => {
+                            self.set(
+                                location.square()?,
+                                SquareOccupancy::Myself
+                            )?;
+                        },
+                        SquareOccupancy::Blocker => {
+                            self.set(
+                                location.square()?,
+                                SquareOccupancy::Myself
+                            )?;
+                            break;
+                        },
+                        SquareOccupancy::Myself => {
+                            return Err(Error::Collision(
+                                String::from(
+                                    "While searching for rook north")
+                            ));
+                        },
+                    }
+                }
+
+                for i in 0..south {
+                    let mut location = piece_location;
+                    location.y = location.y - i;
+                    match self.see(location)? {
+                        SquareOccupancy::Empty => {
+                            self.set(
+                                location.square()?,
+                                SquareOccupancy::Myself
+                            )?;
+                        },
+                        SquareOccupancy::Blocker => {
+                            self.set(
+                                location.square()?,
+                                SquareOccupancy::Myself
+                            )?;
+                            break;
+                        },
+                        SquareOccupancy::Myself => {
+                            return Err(Error::Collision(
+                                String::from(
+                                    "While searching for rook south")
+                            ));
+                        },
+                    }
+                }
+
+                for i in 0..east {
+                    let mut location = piece_location;
+                    location.x = location.x + i;
+                    match self.see(location)? {
+                        SquareOccupancy::Empty => {
+                            self.set(
+                                location.square()?,
+                                SquareOccupancy::Myself
+                            )?;
+                        },
+                        SquareOccupancy::Blocker => {
+                            self.set(
+                                location.square()?,
+                                SquareOccupancy::Myself
+                            )?;
+                            break;
+                        },
+                        SquareOccupancy::Myself => {
+                            return Err(Error::Collision(
+                                String::from(
+                                    "While searching for rook east")
+                            ));
+                        },
+                    }
+                }
+
+                for i in 0..west {
+                    let mut location = piece_location;
+                    location.x = location.x - i;
+                    match self.see(location)? {
+                        SquareOccupancy::Empty => {
+                            self.set(
+                                location.square()?,
+                                SquareOccupancy::Myself
+                            )?;
+                        },
+                        SquareOccupancy::Blocker => {
+                            self.set(
+                                location.square()?,
+                                SquareOccupancy::Myself
+                            )?;
+                            break;
+                        },
+                        SquareOccupancy::Myself => {
+                            return Err(Error::Collision(
+                                String::from(
+                                    "While searching for rook west")
+                            ));
+                        },
                     }
                 }
             },
-            SliderType::bishop => {
-                a
+            Slider::bishop => {
+                // Calculate nw, ne, sw, se.
+                ()
             }
         }
+
+        Ok(())
     }
 
-    fn to_bitboard(&self) -> Bitboard {
-        a
+    fn to_moveboard(&self) -> BitBoard {
+        // Convert all Myself to 1 and else to 0.
+        let mut out = BitBoard::new();
+        for square in 0..64 {
+            match self
+                .see(bitboards::location(square))
+                .unwrap_or(SquareOccupancy::Empty)
+            {
+                SquareOccupancy::Myself => out.bits |= 1u64 << square,
+                _ => (),
+            }
+        }
+
+        out
     }
 }
 
@@ -153,23 +260,34 @@ pub(crate) fn blockerboard_to_mtxboard(
 // Builds all permutations of the blockers for a square.
 fn build_blockers(blocker_mask: BitBoard) -> Vec<BitBoard> {
     let mut out = Vec::new();
+    let mut next_mask = blocker_mask;
+
+    loop {
+        out.push(next_mask);
+
+        if next_mask.bits == 0 {
+            break;
+        }
+
+        next_mask.bits = (next_mask.bits -1) & blocker_mask.bits;
+    }
 
     out
 }
 
 fn build_moveboard(
-    piece: SliderType,
+    piece: Slider,
     blocker_board: BitBoard,
     square: usize
-) -> BitBoard {
+) -> Result<BitBoard> {
     // Convert blockerboard to MtxBoard.
-    let mut board = blockerboard_to_mtxboard(blocker_board);
+    let mut board = blockerboard_to_mtxboard(blocker_board)?;
 
     // Find all squares the piece can move to or capture on.
-    board.moves(piece, square);
+    board.moves(piece, square)?;
 
     // Convert that MtxBoard to BitBoard.
-    board.to_bitboard()
+    Ok(board.to_moveboard())
 }
 
 // Returns a magic number.
@@ -227,10 +345,42 @@ pub fn find_magic(
 }
 
 // Searches for magic numbers and records them in a file.
-pub fn search_magic() {
+pub fn search_magic(magic: Magic) {
     println!("Finding Magic...");
     // Open magic/magic.txt, were best magics so far are stored.
     // best magic/best_magic.txt is where the lengths are stored.
+
+    // Find a magic number for each square for rook.
+    for square in 0.. 64 {
+        // Generate bitboards for this square.
+        let mask = BitBoard::set_val(magic.rook.blocker_masks[square]);
+        let blockers = build_blockers(mask);
+        let mut moves = Vec::new();
+
+        for blocker_set in &blockers {
+            let moveboard = build_moveboard(
+                Slider::rook,
+                *blocker_set,
+                square
+            ).unwrap();
+            moves.push(moveboard);
+        }
+
+        let magic_tuple = find_magic(
+            &blockers,
+            &moves,
+            mask.bits
+        ).unwrap();
+        let magic_number = magic_tuple.0;
+        let magic_moves = magic_tuple.1;
+
+        println!("magic number is: {} for square: {}", magic_number, square);
+        println!("len(blockers) is: {}", blockers.len());
+        println!("len(moves) is: {}", moves.len());
+        println!("len(magic moves) is: {}", magic_moves.len());
+    }
+
+    // Find a magic number for each sqaure for bishop.
 
     println!("Done!");
 }
