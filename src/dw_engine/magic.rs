@@ -119,6 +119,38 @@ impl MtxBoard {
         }
     }
 
+    fn step(&mut self,
+        slide: impl Fn(bitboards::Location, usize) -> bitboards::Location,
+        square: bitboards::Location,
+        end: usize,
+    ) -> Result<()> {
+        for i in 1..end {
+            let location = slide(square, i);
+            match self.see(location)? {
+                SquareOccupancy::Empty => {
+                    self.set(
+                        location.square()?,
+                        SquareOccupancy::Myself
+                    )?;
+                },
+                SquareOccupancy::Blocker => {
+                    self.set(
+                        location.square()?,
+                        SquareOccupancy::Myself
+                    )?;
+                    break;
+                },
+                SquareOccupancy::Myself => {
+                    return Err(Error::Collision(
+                        String::from(
+                            "While searching for step")
+                    ));
+                },
+            }
+        }
+        Ok(())
+    }
+
     fn moves(&mut self, piece: Slider, square: usize) -> Result<()> {
         let piece_location = bitboards::location(square);
         // Determine loop sizes for cardinal directions.
@@ -130,109 +162,37 @@ impl MtxBoard {
         // Scan directions using movement algorithm for correct piece.
         match piece {
             Slider::rook => {
-                for i in 1..north {
-                    let mut location = piece_location;
-                    location.y = location.y + i;
-                    match self.see(location)? {
-                        SquareOccupancy::Empty => {
-                            self.set(
-                                location.square()?,
-                                SquareOccupancy::Myself
-                            )?;
-                        },
-                        SquareOccupancy::Blocker => {
-                            self.set(
-                                location.square()?,
-                                SquareOccupancy::Myself
-                            )?;
-                            break;
-                        },
-                        SquareOccupancy::Myself => {
-                            return Err(Error::Collision(
-                                String::from(
-                                    "While searching for rook north")
-                            ));
-                        },
-                    }
-                }
+                // North.
+                self.step(|mut loc, i| {
+                        loc.y += i;
+                        loc
+                    },
+                    piece_location,
+                    north)?;
 
-                for i in 1..south {
-                    let mut location = piece_location;
-                    location.y = location.y - i;
-                    match self.see(location)? {
-                        SquareOccupancy::Empty => {
-                            self.set(
-                                location.square()?,
-                                SquareOccupancy::Myself
-                            )?;
-                        },
-                        SquareOccupancy::Blocker => {
-                            self.set(
-                                location.square()?,
-                                SquareOccupancy::Myself
-                            )?;
-                            break;
-                        },
-                        SquareOccupancy::Myself => {
-                            return Err(Error::Collision(
-                                String::from(
-                                    "While searching for rook south")
-                            ));
-                        },
-                    }
-                }
+                // South.
+                self.step(|mut loc, i| {
+                        loc.y -= i;
+                        loc
+                    },
+                    piece_location,
+                    south)?;
 
-                for i in 1..east {
-                    let mut location = piece_location;
-                    location.x = location.x + i;
-                    match self.see(location)? {
-                        SquareOccupancy::Empty => {
-                            self.set(
-                                location.square()?,
-                                SquareOccupancy::Myself
-                            )?;
-                        },
-                        SquareOccupancy::Blocker => {
-                            self.set(
-                                location.square()?,
-                                SquareOccupancy::Myself
-                            )?;
-                            break;
-                        },
-                        SquareOccupancy::Myself => {
-                            return Err(Error::Collision(
-                                String::from(
-                                    "While searching for rook east")
-                            ));
-                        },
-                    }
-                }
+                // East.
+                self.step(|mut loc, i| {
+                        loc.x += i;
+                        loc
+                    },
+                    piece_location,
+                    east)?;
 
-                for i in 1..west {
-                    let mut location = piece_location;
-                    location.x = location.x - i;
-                    match self.see(location)? {
-                        SquareOccupancy::Empty => {
-                            self.set(
-                                location.square()?,
-                                SquareOccupancy::Myself
-                            )?;
-                        },
-                        SquareOccupancy::Blocker => {
-                            self.set(
-                                location.square()?,
-                                SquareOccupancy::Myself
-                            )?;
-                            break;
-                        },
-                        SquareOccupancy::Myself => {
-                            return Err(Error::Collision(
-                                String::from(
-                                    "While searching for rook west")
-                            ));
-                        },
-                    }
-                }
+                // West.
+                self.step(|mut loc, i| {
+                        loc.x -= i;
+                        loc
+                    },
+                    piece_location,
+                    west)?;
             },
             Slider::bishop => {
                 // Calculate nw, ne, sw, se.
