@@ -101,6 +101,21 @@ impl MtxBoard {
         self.board.get(index).ok_or(Error::VectorSize).copied()
     }
 
+    fn print(&self) {
+        for row in 7..=0 {
+            for col in 0..8 {
+                let location = bitboards::Location{ x: col, y: row };
+                let occupancy = self.see(location).unwrap();
+                let occ = match occupancy {
+                    SquareOccupancy::Myself => "1",
+                    _ => "0",
+                };
+                print!("{}", occ);
+            }
+            print!("\n");
+        }
+    }
+
     fn moves(&mut self, piece: Slider, square: usize) -> Result<()> {
         let piece_location = bitboards::location(square);
         // Determine loop sizes for cardinal directions.
@@ -108,6 +123,11 @@ impl MtxBoard {
         let south = piece_location.y;
         let east = 8-piece_location.x;
         let west = piece_location.x;
+
+        // Debugging
+        self.print();
+        println!("piece location: {},{}", piece_location.x, piece_location.y);
+        println!("n: {}, e: {}, s: {}, w: {}", north, east, south, west);
 
         // Scan directions using movement algorithm for correct piece.
         match piece {
@@ -136,6 +156,7 @@ impl MtxBoard {
                             ));
                         },
                     }
+                    println!("north search proceeded to {}", i);
                 }
 
                 for i in 0..south {
@@ -162,6 +183,7 @@ impl MtxBoard {
                             ));
                         },
                     }
+                    println!("south search proceeded to {}", i);
                 }
 
                 for i in 0..east {
@@ -188,6 +210,7 @@ impl MtxBoard {
                             ));
                         },
                     }
+                    println!("east search proceeded to {}", i);
                 }
 
                 for i in 0..west {
@@ -214,6 +237,7 @@ impl MtxBoard {
                             ));
                         },
                     }
+                    println!("west search proceeded to {}", i);
                 }
             },
             Slider::bishop => {
@@ -358,6 +382,7 @@ pub fn search_magic(magic: Magic) {
         let mut moves = Vec::new();
 
         for blocker_set in &blockers {
+            println!("Searching next blockers");
             let moveboard = build_moveboard(
                 Slider::rook,
                 *blocker_set,
