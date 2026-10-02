@@ -127,10 +127,6 @@ impl MtxBoard {
         let east = 8-piece_location.x;
         let west = piece_location.x;
 
-        // Debugging
-        // println!("piece location: {},{}", piece_location.x, piece_location.y);
-        // println!("n: {}, e: {}, s: {}, w: {}", north, east, south, west);
-
         // Scan directions using movement algorithm for correct piece.
         match piece {
             Slider::rook => {
@@ -158,7 +154,6 @@ impl MtxBoard {
                             ));
                         },
                     }
-                    // println!("north searched iteration {}", i);
                 }
 
                 for i in 1..south {
@@ -185,7 +180,6 @@ impl MtxBoard {
                             ));
                         },
                     }
-                    // println!("south search proceeded to {}", i);
                 }
 
                 for i in 1..east {
@@ -212,7 +206,6 @@ impl MtxBoard {
                             ));
                         },
                     }
-                    // println!("east search proceeded to {}", i);
                 }
 
                 for i in 1..west {
@@ -239,7 +232,6 @@ impl MtxBoard {
                             ));
                         },
                     }
-                    // println!("west search proceeded to {}", i);
                 }
             },
             Slider::bishop => {
@@ -309,9 +301,6 @@ fn build_moveboard(
     // Convert blockerboard to MtxBoard.
     let mut board = blockerboard_to_mtxboard(blocker_board)?;
 
-    // Debug.
-    // board.print();
-
     // Find all squares the piece can move to or capture on.
     board.moves(piece, square)?;
 
@@ -335,6 +324,8 @@ pub fn find_magic(
 
     // cast_spell(blockers) is index in magic_movebards of moveboard.
     let mut magic_moveboards = Vec::new();
+
+    let mut max_index = 0;
 
     'search: loop {
         magic_moveboards = vec![BitBoard::new(); table_size];
@@ -372,27 +363,15 @@ pub fn find_magic(
                 }
             }
 
-            // // Resize magic_moveboards if necessary.
-            // magic_moveboards.resize(index + 1, BitBoard::new());
-            //
-            // if !indexes.insert(index) {
-            //     if magic_moveboards.get(index)
-            //         .ok_or(Error::ItemNotFound(String::from(
-            //             "magic moveboard at index")))?
-            //     .bits != moveboard.bits {
-            //         continue 'search;
-            //     }
-            // } else {
-            //     match magic_moveboards.get_mut(index) {
-            //         Some(elem) => *elem = moveboard,
-            //         None => return Err(Error::FailedMutate(String::from(
-            //             "magic moveboards at index"))),
-            //     }
-            // }
+            if index > max_index {
+                max_index = index;
+            }
         }
         break;
     }
     // Check len(magic_moveboards) to see how efficient candidate is.
+    println!("max_index is: {} and len(magic_moveboards) is: {}",
+        max_index, magic_moveboards.len());
     Ok((candidate, magic_moveboards))
 }
 
@@ -428,9 +407,6 @@ pub fn search_magic(magic: Magic) {
         let magic_moves = magic_tuple.1;
 
         println!("magic number is: {} for square: {}", magic_number, square);
-        println!("len(blockers) is: {}", blockers.len());
-        println!("len(moves) is: {}", moves.len());
-        println!("len(magic moves) is: {}", magic_moves.len());
     }
 
     // Find a magic number for each sqaure for bishop.
