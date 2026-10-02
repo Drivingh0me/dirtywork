@@ -3,6 +3,11 @@ use clap::Parser;
 
 use crate::error::Result;
 
+// TODO: Add arg for testing if a number is a magic number on square
+//       for a piece.
+// TODO: Add arg for searching for bit-1 magic numbers wither by piece and 
+//       square or by random.
+
 #[derive(Parser, Debug)]
 #[command(arg_required_else_help = false,
     author = "Caleb Griffin",

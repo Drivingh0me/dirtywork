@@ -10,7 +10,21 @@ use crate::dw_engine::bitboards;
 // Should be 64 magic rook numbers and 64 magic bishop numbers.
 // ----------------------------------------------------------------------------
 
-// Import blocker_masks from bitboard generator.
+// TODO: Rename Slider::rook to Rook and Bishop to keep naming convention.
+
+// Import magic numbers.
+pub const K_MOVS: [u64; 64] = include!(
+    "../../bitboard_generator/bitboards/k.txt"
+);
+
+// Import magic numbers.
+pub const R_MAGICS: [u64; 64] = include!(
+    "../../magic/magic_rook.txt"
+);
+
+pub const B_MAGICS: [u64; 64] = include!(
+    "../../magic/magic_bishop.txt"
+);
 
 enum Slider {
     bishop,
@@ -48,7 +62,10 @@ impl PieceMagic {
                 Slider::bishop => bitboards::B_MASK,
                 Slider::rook => bitboards::R_MASK,
             },
-            magic_numbers: [0u64; 64],
+            magic_numbers: match slider {
+                Slider::bishop => B_MAGICS,
+                Slider::rook => R_MAGICS,
+            },
             slider: slider,
         }
     }
@@ -367,17 +384,15 @@ pub fn find_magic(
         }
         break;
     }
-    // Check len(magic_moveboards) to see how efficient candidate is.
-    println!("max_index is: {} and len(magic_moveboards) is: {}",
-        max_index, magic_moveboards.len());
     Ok((candidate, magic_moveboards))
 }
 
 // Searches for magic numbers and records them in a file.
 pub fn search_magic(magic: Magic) {
     println!("Finding Magic...");
-    // Open magic/magic.txt, were best magics so far are stored.
-    // best magic/best_magic.txt is where the lengths are stored.
+
+    let mut rook_magic_numbers = Vec::new();
+    let mut bishop_magic_numbers = Vec::new();
 
     // Find a magic number for each square for rook.
     for square in 0.. 64 {
@@ -401,12 +416,11 @@ pub fn search_magic(magic: Magic) {
             &moves,
             mask.bits
         ).unwrap();
-        // let magic_number = magic_tuple.0;
-        // let magic_moves = magic_tuple.1;
 
-        println!("magic number is: {} for square: {}", magic_number, square);
+        rook_magic_numbers.push(magic_number);
     }
 
+    // Find a magic number for each sqaure for bishop.
     for square in 0.. 64 {
         // Generate bitboards for this square.
         let mask = BitBoard::set_val(magic.bishop.blocker_masks[square]);
@@ -428,13 +442,21 @@ pub fn search_magic(magic: Magic) {
             &moves,
             mask.bits
         ).unwrap();
-        // let magic_number = magic_tuple.0;
-        // let magic_moves = magic_tuple.1;
 
-        println!("magic number is: {} for square: {}", magic_number, square);
+        bishop_magic_numbers.push(magic_number);
     }
 
-    // Find a magic number for each sqaure for bishop.
+    // Convert magics to an rust-style array that can be included.
+    let rook_magic_string = format!("{:?}", rook_magic_numbers);
+    let bishop_magic_string = format!("{:?}", bishop_magic_numbers);
+
+    // Write magic/magic.txt, were normal magics are stored.
+    std::fs::write("magic/magic_rook.txt", rook_magic_string).unwrap();
+    std::fs::write("magic/magic_bishop.txt", bishop_magic_string).unwrap();
+
+    // best magic/best_magic.txt is where some magics of fewer bits are stored.
+
+    // TODO: Add fancy magics array.
 
     println!("Done!");
 }
