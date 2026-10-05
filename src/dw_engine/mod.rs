@@ -3,6 +3,7 @@ mod bitboards;
 mod magic;
 pub use magic::initialize_magic;
 pub use magic::search_magic;
+pub use bitboards::BitBoard;
 
 use crate::error::{Result, Error};
 
@@ -25,22 +26,6 @@ pub enum Piece {
 pub struct Move {
     piece: Piece,
     bits: BitBoard,
-}
-
-// Bitboard is a1 -> h1 -> a2 -> h2... -> h8
-#[derive(Debug, PartialEq, Default, Clone, Copy)]
-pub struct BitBoard {
-    bits: u64,
-}
-
-impl BitBoard {
-    fn new() -> Self {
-        Self { bits: 0 }
-    }
-
-    fn set_val(val: u64) -> Self {
-        Self { bits: val }
-    }
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
@@ -121,7 +106,7 @@ impl Default for GameState {
         board.push(starting_position);
 
         Self {
-            haswon: Option::default(),
+            haswon: Option::None,
             incheck: false,
             board: board,
         }

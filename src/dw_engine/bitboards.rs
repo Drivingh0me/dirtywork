@@ -1,10 +1,25 @@
-use crate::dw_engine::BitBoard;
 use crate::error::{Result, Error};
 
 // TODO: Convert u64 moveboards to BitBoard moveboards.
 
 // For pawn, mut leave a "crumb" behind if moved 2 spaces on first move so
 // that another pawn can au-passant to capture.
+
+// Bitboard is a1 -> h1 -> a2 -> h2... -> h8
+#[derive(Debug, PartialEq, Default, Clone, Copy)]
+pub struct BitBoard {
+    pub bits: u64,
+}
+
+impl BitBoard {
+    pub fn new() -> Self {
+        Self { bits: 0 }
+    }
+
+    pub fn set_val(val: u64) -> Self {
+        Self { bits: val }
+    }
+}
 
 // Hopping piece movements.
 pub const K_MOVS: [u64; 64] = include!(
