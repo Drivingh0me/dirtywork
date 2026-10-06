@@ -10,13 +10,6 @@ use crate::dw_engine::bitboards;
 // Should be 64 magic rook numbers and 64 magic bishop numbers.
 // ----------------------------------------------------------------------------
 
-// TODO: Rename Slider::rook to Rook and Bishop to keep naming convention.
-
-// Import magic numbers.
-pub const K_MOVS: [u64; 64] = include!(
-    "../../bitboard_generator/bitboards/k.txt"
-);
-
 // Import magic numbers.
 pub const R_MAGICS: [u64; 64] = include!(
     "../../magic/magic_rook.txt"
@@ -27,12 +20,15 @@ pub const B_MAGICS: [u64; 64] = include!(
 );
 
 enum Slider {
-    bishop,
-    rook,
+    Bishop,
+    Rook,
 }
 
 pub(crate) struct PieceMagic {
     move_boards: [Vec<BitBoard>; 64],
+
+    // Consider removing blocker_boards since only used in magic number finding
+    // and not in use of magic.
     blocker_boards: [Vec<BitBoard>; 64],
     blocker_masks: [u64; 64], // For each square.
     magic_numbers: [u64; 64], // For each square.
@@ -47,9 +43,14 @@ pub struct Magic {
 impl Magic {
     fn new() -> Self {
         Self {
-            bishop: PieceMagic::new(Slider::bishop),
-            rook: PieceMagic::new(Slider::rook),
+            bishop: PieceMagic::new(Slider::Bishop),
+            rook: PieceMagic::new(Slider::Rook),
         }
+    }
+
+    fn fill_moves(&mut self) {
+        self.bishop.fill_moves();
+        self.rook.fill_moves();
     }
 }
 
@@ -59,20 +60,32 @@ impl PieceMagic {
             move_boards: std::array::from_fn(|_| Vec::new()),
             blocker_boards: std::array::from_fn(|_| Vec::new()),
             blocker_masks: match slider {
-                Slider::bishop => bitboards::B_MASK,
-                Slider::rook => bitboards::R_MASK,
+                Slider::Bishop => bitboards::B_MASK,
+                Slider::Rook => bitboards::R_MASK,
             },
             magic_numbers: match slider {
-                Slider::bishop => B_MAGICS,
-                Slider::rook => R_MAGICS,
+                Slider::Bishop => B_MAGICS,
+                Slider::Rook => R_MAGICS,
             },
             slider: slider,
+        }
+    }
+
+    fn fill_moves(&mut self) {
+        // Fill moves vec for each square.
+        for i in 0..64 {
+            let blocker_boards = blockers_from_masks(self.blocker_mask[i]);
+            let moves = moves_from_blockers(blocker_boards);
+            self.move_boards[i] = moves;
         }
     }
 }
 
 pub fn initialize_magic() -> Magic {
     let out = Magic::new();
+
+    // Fill move_boards.
+    out.fill_moves();
     out
 }
 
@@ -84,6 +97,15 @@ pub(crate) fn cast_spell(
 ) -> usize {
     let bb = blocker_board.bits;
     ((bb.wrapping_mul(magic_number)) >> (64 - blockers)) as usize
+}
+
+fn moves_from_blockers(blockers: Vec<BitBoard>) -> Vec<BitBoard> {
+    out = Vec::new();
+
+    // For each blocker set, determine the moveboard and place it at it's
+    // correct index.
+
+    out
 }
 
 #[derive(Copy, Clone)]
@@ -183,7 +205,7 @@ impl MtxBoard {
 
         // Scan directions using movement algorithm for correct piece.
         match piece {
-            Slider::rook => {
+            Slider::Rook => {
                 // North.
                 self.step(|mut loc, i| {
                         loc.y += i;
@@ -216,7 +238,7 @@ impl MtxBoard {
                     piece_location,
                     west)?;
             },
-            Slider::bishop => {
+            Slider::Bishop => {
                 // NorthWest.
                 self.step(|mut loc, i| {
                         loc.y += i;
@@ -404,7 +426,7 @@ pub fn search_magic(magic: Magic) {
         for blocker_set in &blockers {
             // println!("Searching next blockers");
             let moveboard = build_moveboard(
-                Slider::rook,
+                Slider::Rook,
                 *blocker_set,
                 square
             ).unwrap();
@@ -430,7 +452,7 @@ pub fn search_magic(magic: Magic) {
         for blocker_set in &blockers {
             // println!("Searching next blockers");
             let moveboard = build_moveboard(
-                Slider::bishop,
+                Slider::Bishop,
                 *blocker_set,
                 square
             ).unwrap();
@@ -460,3 +482,4 @@ pub fn search_magic(magic: Magic) {
 
     println!("Done!");
 }
+
