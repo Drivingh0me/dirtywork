@@ -259,9 +259,17 @@ class Piece:
         if piece_y == 0:
             bottom = False
 
-        # TODO: Add exception for pawns first move.
-
         out = self.mobility.copy()
+
+        # Replace the fist move of the pawns with the fist move board.
+        if self.type == "wp":
+            if row == 1:
+                # Replace normal move with first move.
+                out = self.mobility_fm.copy()
+        if self.type == "bp":
+            if row == 6:
+                # Replace normal move with first move.
+                out = self.mobility_fm.copy()
 
         out = out[row:row + 8, col:col + 8]
 
@@ -276,7 +284,7 @@ class Piece:
                 out[7, :] = 0
             if bottom:
                 out[0, :] = 0
-            print(out)
+
         return out
 
 def array_to_int(arr):
