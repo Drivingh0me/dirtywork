@@ -5,9 +5,9 @@ use crate::dw_engine::BitBoard;
 use crate::dw_engine::bitboards;
 
 // Notes ----------------------------------------------------------------------
-// Magic is used to calculate the movebaord for slider. Moveboards for hoppers
-// are precalculated completely and storred in bitboards.rs.
-// Should be 64 magic rook numbers and 64 magic bishop numbers.
+// Magic is used to calculate the movebaord for sliders.
+// Moveboards for hoppers are precalculated completely and
+// storred in bitboards.rs.
 // ----------------------------------------------------------------------------
 
 // Import magic numbers.
@@ -26,10 +26,6 @@ enum Slider {
 
 pub(crate) struct PieceMagic {
     move_boards: [Vec<BitBoard>; 64],
-
-    // Consider removing blocker_boards since only used in magic number finding
-    // and not in use of magic.
-    // blocker_boards: [Vec<BitBoard>; 64],
     blocker_masks: [u64; 64], // For each square.
     magic_numbers: [u64; 64], // For each square.
     slider: Slider,
@@ -58,7 +54,6 @@ impl PieceMagic {
     fn new(slider: Slider) -> Self {
         Self {
             move_boards: std::array::from_fn(|_| Vec::new()),
-            // blocker_boards: std::array::from_fn(|_| Vec::new()),
             blocker_masks: match slider {
                 Slider::Bishop => bitboards::B_MASK,
                 Slider::Rook => bitboards::R_MASK,
@@ -102,11 +97,59 @@ pub(crate) fn cast_spell(
     ((bb.wrapping_mul(magic_number)) >> (64 - blockers)) as usize
 }
 
-fn moves_from_blockers(blockers: Vec<BitBoard>, magic: u64) -> Vec<BitBoard> {
-    let out = Vec::new();
+fn moves_from_blockers(
+    blockers: &Vec<BitBoard>,
+    magic: u64,
+    piece: Slider,
+    square: usize
+) -> Vec<BitBoard> {
+    let moves = Vec::new();
 
-    // For each blocker set, determine the moveboard and place it at it's
-    // correct index.
+    for blocker_set in &blockers {
+        let moveboard = build_moveboard(
+            piece,
+            *blocker_set,
+            square
+        ).unwrap();
+        moves.push(moveboard);
+    }
+
+    let out = moves_from_magic(
+        &blockers,
+        &moves,
+        mask.bits
+    ).unwrap();
+
+    out
+}
+
+fn moves_from_magic(
+    blockers: &Vec<BitBoard>,
+    moves: &Vec<BitBoard>,
+    mask: u64
+) -> Result<Vec<BitBoard>> {
+    let mut out = Vec::new();
+    let num_of_blockers: u32 = blocker_mask.count_ones();
+
+    let table_size = 1usize << num_of_blockers;
+
+    for i in 0..blocker_boards.len() {
+        let blockers: BitBoard = *blocker_boards
+            .get(i)
+            .ok_or(Error::ItemNotFound(String::from(
+                "blockerboard in blockerboards")))?;
+        let moveboard: BitBoard = *move_boards
+            .get(i)
+            .ok_or(Error::ItemNotFound(String::from(
+                "moveboard in moveboards")))?;
+        let index = cast_spell(blockers, candidate, num_of_blockers);
+
+        match out.get_mut(index) {
+            Some(elem) => *elem = moveboard,
+            None => return Err(Error::FailedMutate(String::from(
+                "magic_bitboards at index"))),
+        }
+    }
 
     out
 }
