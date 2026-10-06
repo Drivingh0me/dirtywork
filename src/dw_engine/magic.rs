@@ -29,7 +29,7 @@ pub(crate) struct PieceMagic {
 
     // Consider removing blocker_boards since only used in magic number finding
     // and not in use of magic.
-    blocker_boards: [Vec<BitBoard>; 64],
+    // blocker_boards: [Vec<BitBoard>; 64],
     blocker_masks: [u64; 64], // For each square.
     magic_numbers: [u64; 64], // For each square.
     slider: Slider,
@@ -58,7 +58,7 @@ impl PieceMagic {
     fn new(slider: Slider) -> Self {
         Self {
             move_boards: std::array::from_fn(|_| Vec::new()),
-            blocker_boards: std::array::from_fn(|_| Vec::new()),
+            // blocker_boards: std::array::from_fn(|_| Vec::new()),
             blocker_masks: match slider {
                 Slider::Bishop => bitboards::B_MASK,
                 Slider::Rook => bitboards::R_MASK,
@@ -74,15 +74,18 @@ impl PieceMagic {
     fn fill_moves(&mut self) {
         // Fill moves vec for each square.
         for i in 0..64 {
-            let blocker_boards = blockers_from_masks(self.blocker_mask[i]);
-            let moves = moves_from_blockers(blocker_boards);
+            let blocker_mask = BitBoard::set_val(self.blocker_masks[i]);
+            let blocker_boards = build_blockers(blocker_mask);
+            let moves = moves_from_blockers(
+                blocker_boards,
+                self.magic_numbers[i]);
             self.move_boards[i] = moves;
         }
     }
 }
 
 pub fn initialize_magic() -> Magic {
-    let out = Magic::new();
+    let mut out = Magic::new();
 
     // Fill move_boards.
     out.fill_moves();
@@ -99,8 +102,8 @@ pub(crate) fn cast_spell(
     ((bb.wrapping_mul(magic_number)) >> (64 - blockers)) as usize
 }
 
-fn moves_from_blockers(blockers: Vec<BitBoard>) -> Vec<BitBoard> {
-    out = Vec::new();
+fn moves_from_blockers(blockers: Vec<BitBoard>, magic: u64) -> Vec<BitBoard> {
+    let out = Vec::new();
 
     // For each blocker set, determine the moveboard and place it at it's
     // correct index.
