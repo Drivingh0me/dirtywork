@@ -10,6 +10,8 @@ use crate::dw_engine::bitboards;
 // storred in bitboards.rs.
 // ----------------------------------------------------------------------------
 
+// TODO: Make this all multithreaded and clean up to c style fn order.
+
 // Import magic numbers.
 pub const R_MAGICS: [u64; 64] = include!(
     "../../magic/magic_rook.txt"
@@ -523,6 +525,7 @@ pub fn search_magic(magic: Magic) {
     std::fs::write("magic/magic_bishop.txt", bishop_magic_string).unwrap();
 
     // best magic/best_magic.txt is where some magics of fewer bits are stored.
+    // These are called "fancy magic".
 
     // TODO: Add fancy magics array.
 
