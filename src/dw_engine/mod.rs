@@ -14,6 +14,7 @@ pub enum Color {
     Black,
 }
 
+// TODO: Condense this to one byte.
 pub enum Piece {
     Pawn(Color),
     Knight(Color),
@@ -25,7 +26,29 @@ pub enum Piece {
 
 pub struct Move {
     piece: Piece,
-    bits: BitBoard,
+    // xor move with current piece bb to move piece.
+    // Move is 1 where piece was and 1 where piece is now.
+    move: BitBoard,
+    // and capture with all other piece's bb to remove piece that was captured
+    // if captured.
+    // Capture is all 1 except where piece was moved to.
+    capture: BitBoard,
+}
+
+// Stores if the rooks or kings have moved to stop casttle rights.
+struct CastleBool {
+    // bits:
+    // can_sastle (1 is yes),
+    // w_king, b_king,
+    // w_kingside_rook, w_queenside_rook,
+    // b_kingside_rook, b_queenside_rook.
+    val: u8,
+}
+
+impl CastleBool {
+    fn king(&mut self, color: Color) {
+        //
+    }
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
@@ -46,6 +69,7 @@ pub struct BoardState {
     // Pawn that moved two squares in the previous turn.
     // Needs to leave behind a crumb as well.
     dbl_pawn: BitBoard,
+    has_moved: CastleBool,
 }
 
 impl BoardState {
@@ -142,6 +166,11 @@ pub fn dw_analysis(
     Ok((best_move, eval))
 }
 
+// Calculate legal moves.
+fn legal_moves(state: &BoardState) -> Vec<Move> {
+    //
+}
+
 // Static evaluation.
 fn evaluate_pos(state: &BoardState) -> f32 {
     let material_weight: f32 = 0.5;
@@ -181,7 +210,7 @@ fn count_material(state: &BoardState) -> f32 {
     let r = r as f32;
     let q = q as f32;
 
-    1.0 * p + 2.9 * n + 3.0 * b + 5.0 * r + 9.0 * q
+    1.0 * p + 3.0 * n + 3.0 * b + 5.0 * r + 9.0 * q
 }
 
 // Calculates how many pieces there are.
