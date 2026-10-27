@@ -54,14 +54,16 @@ Simply run dirtywork to enter the TUI.
 \section{Algorithms}
 The evaluation algorithm used by dirtywork is temporal interdependant eval, or ``TIE''.
 First, TIE looks ahead n depth for all possible moves.
-Once these moves are calculated, a static evaluation is run on each final position.
-The best positions for white are then scanned for rejection by black.
-If black can stop the position from ocurring, then the branch is trimmed.
+Once these moves are calculated, a static evaluation is run on each position and each point is vertically ranked where higher is better for white.
+A path is then drawn where white's move chooses the highest point and black's move chooses the lowest point for all first moves.
+The best n positions for white are then saved and all others are rejected.
+The same process is repeated with these n points where all paths compete with each other.
+This is repeated n times.
 
 \subsection{Depth}
-The depth parameter of TIE sets how many times the algorithm is recursivly called. 
+The depth parameter of TIE sets how many times the algorithm is recursivly called.
 A higher depth is more expensive, but more accurate.
-If we call the depth parameter \textbf{n}, then we can derive the rest of the parameters from this \textbf{n}. 
+If we call the depth parameter \textbf{n}, then we can derive the rest of the parameters from this \textbf{n}.
 The prune function removes the lowest eval move sequences and leave only the top \(2 + 2\sqrt{n}\) sequences.
 Prune is called every \(\sqrt{n + 2}\) moves.
 
@@ -71,6 +73,6 @@ Bitboards ar 64 bit integers wher each bit coresponds to a square on the board.
 If the bit is zero, no peice is present, if the bit is 1, a piece is present at that square.
 
 \subsection{Determining the area under a function}
-If you want to determine \(\int_a^b x^2\,dx\) for your system.
+If you want to determine \(\int_a^b x\,dx\) for a line \(x\), simply sum all of the ranked move points \(x_a\) to \(x_b\).
 
 \end{document}
