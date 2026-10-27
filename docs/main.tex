@@ -52,13 +52,20 @@ Dirtywork can be easily run in the terminal with flags.
 Simply run dirtywork to enter the TUI.
 
 \section{Algorithms}
-The evaluation algorithm used by dirtywork is temporal interdependant eval, or ``TIE''.
-First, TIE looks ahead n depth for all possible moves.
-Once these moves are calculated, a static evaluation is run on each position and each point is vertically ranked where higher is better for white.
-A path is then drawn where white's move chooses the highest point and black's move chooses the lowest point for all first moves.
-The best n positions for white are then saved and all others are rejected.
-The same process is repeated with these n points where all paths compete with each other.
-This is repeated n times.
+The evaluation algorithm used by dirtywork is Temporal Interdependant Eval, or ``TIE''.
+Firstly, TIE determines all legal moves from the root board, these are the fundamentals (f), and the goal is to rank them.
+Secondly, TIE looks ahead n depth for all legal moves from the fundamentals.
+Once these f1 and children are calculated, a static evaluation is run on all points and they are vertically ranked by a static evaluation engine where higher is better for white.
+A path is then drawn where white's move chooses the highest point and black's move chooses the lowest point, for top z f2.
+The best x positions for white are then saved and all others are forgotten.
+The best value from f2 top child is now used to rank parent f1.
+Now that f1 are ranked with detail 1, all f2 of top f1 are treated as f1 was previously.
+This repeats until detail n is found for all fundamentals.
+Top f1 pass max value to fundamentals and the fundamentals are ranked.
+
+Essentially, a tree is formed from the fundamentals and the children are used to rank the fundamentals.
+The top fundamentals are then pushed further and the top grandchildren are used to rank the fundamentals.
+These top fundamentals are then pushed and the top great grand children are used to rank the fundamentals, and so on.
 
 \subsection{Depth}
 The depth parameter of TIE sets how many times the algorithm is recursivly called.
