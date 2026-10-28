@@ -15,6 +15,7 @@ pub enum Color {
 }
 
 // TODO: Condense this to one byte.
+// color bit, then seven bits for piece (includes pawn crumb).
 pub enum Piece {
     Pawn(Color),
     Knight(Color),
