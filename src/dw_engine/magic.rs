@@ -89,7 +89,7 @@ pub fn initialize_magic() -> Magic {
     out
 }
 
-// Should return a unique index of moveboards for any blockerboard.
+// Returns index of moveboard in moveboards for blockerboard.
 pub(crate) fn cast_spell(
     blocker_board: BitBoard,
     magic_number: u64,
@@ -97,6 +97,25 @@ pub(crate) fn cast_spell(
 ) -> usize {
     let bb = blocker_board.bits;
     ((bb.wrapping_mul(magic_number)) >> (64 - blockers)) as usize
+}
+
+// Returns moveboard for a slideing piece.
+pub fn get_moveboard(
+    piece: Slider,
+    blockers: BitBoard
+    magic: &Magic,
+) -> BitBoard {
+    // Determine number of blockers.
+    let num_of_blockers = blockers.bits.count_ones();
+
+    // Get magic number.
+    let magic_number = 
+
+    // Get magic index.
+    let index = cast_spell(blockers, magic_number, num_of_blockers);
+
+    // Get moveboard from magic index.
+
 }
 
 fn moves_from_blockers(

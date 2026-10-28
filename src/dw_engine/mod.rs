@@ -141,7 +141,8 @@ impl Default for GameState {
 // Returns the best move as a BoardState and the eval as a float.
 pub fn dw_analysis(
     state: GameState,
-    depth: usize
+    depth: usize,
+    magic: Magic,
 ) -> Result<(BoardState, f32)> {
     println!("thinking...");
 
