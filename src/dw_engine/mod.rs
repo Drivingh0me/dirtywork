@@ -39,6 +39,7 @@ pub struct MovePiece {
 }
 
 // Stores if the rooks or kings have moved to stop casttle rights.
+#[derive(Debug, PartialEq, Clone, Copy)]
 struct CastleBool {
     // bits:
     // can_sastle (1 is yes),

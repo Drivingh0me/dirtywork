@@ -74,13 +74,17 @@ impl PieceMagic {
             let blocker_mask = BitBoard::set_val(self.blocker_masks[i]);
             let blocker_boards = build_blockers(blocker_mask);
             let moves = moves_from_blockers(
-                blocker_boards,
-                self.magic_numbers[i]);
+                &blocker_boards,
+                self.magic_numbers[i],
+                self.slider,
+                i
+            );
             self.move_boards[i] = moves;
         }
     }
 }
 
+// The main fn called to initialize magic for the engine.
 pub fn initialize_magic() -> Magic {
     let mut out = Magic::new();
 
@@ -100,8 +104,10 @@ pub(crate) fn cast_spell(
 }
 
 // Returns moveboard for a slideing piece.
+// This is the main fn that the engine calls to find moves for a piece.
 pub fn get_moveboard(
     piece: Slider,
+    square: u64,
     blockers: BitBoard,
     magic: &Magic,
 ) -> BitBoard {
@@ -109,15 +115,36 @@ pub fn get_moveboard(
     let num_of_blockers = blockers.bits.count_ones();
 
     // Get magic number.
-    let magic_number = 0;
+    let magics = match piece {
+        Slider::Bishop => magic.bishop.magic_numbers,
+        Slider::Rook => magic.rook.magic_numbers,
+    };
+    let magic_number = magics
+        .get(square as usize)
+        .expect("Index should be a square");
 
     // Get magic index.
-    let index = cast_spell(blockers, magic_number, num_of_blockers);
+    let index = cast_spell(blockers, *magic_number, num_of_blockers);
 
     // Get moveboard from magic index.
+    let move_boards = match piece {
+        Slider::Bishop => magic.bishop.move_boards,
+        Slider::Rook => magic.rook.move_boards,
+    };
 
+    let move_board = move_boards
+        .get(square as usize)
+        .expect("Index of move_boards should be a value from square");
+
+    let out = move_board
+        .get(index)
+        .expect("magic index should be valid");
+
+    *out
 }
 
+// Creates a vector of bitboards that is all of the moves for a piece on
+// a square given certain blockers.
 fn moves_from_blockers(
     blockers: &Vec<BitBoard>,
     magic: u64,
@@ -126,7 +153,9 @@ fn moves_from_blockers(
 ) -> Vec<BitBoard> {
     let mut moves = Vec::new();
 
-    for blocker_set in &blockers {
+    // Adds all of the moveboards to "moves" that were generated from the
+    // blockerboards.
+    for blocker_set in blockers {
         let moveboard = build_moveboard(
             piece,
             *blocker_set,
@@ -135,35 +164,41 @@ fn moves_from_blockers(
         moves.push(moveboard);
     }
 
+    // Orders the moveboards so that they can be acessed by the magic index.
     let out = moves_from_magic(
         &blockers,
         &moves,
-        mask.bits
+        magic
     ).unwrap();
 
     out
 }
 
+// Takes a series of moveboards and blockerboards and arranges the moveboards
+// so they can be accessed by magic indexing.
 fn moves_from_magic(
     blockers: &Vec<BitBoard>,
     moves: &Vec<BitBoard>,
-    mask: u64
+    magic: u64
 ) -> Result<Vec<BitBoard>> {
     let mut out = Vec::new();
-    let num_of_blockers: u32 = blockers.count_ones();
 
-    let table_size = 1usize << num_of_blockers;
+    for i in 0..blockers.len() {
+        let num_of_blockers: u32 = blockers
+            .get(i)
+            .expect("Blockers should be at least len of blockers")
+            .bits
+            .count_ones();
 
-    for i in 0..blocker_boards.len() {
-        let blockers: BitBoard = *blocker_boards
+        let blocker_bb = *blockers
             .get(i)
             .ok_or(Error::ItemNotFound(String::from(
                 "blockerboard in blockerboards")))?;
-        let moveboard: BitBoard = *move_boards
+        let moveboard: BitBoard = *moves
             .get(i)
             .ok_or(Error::ItemNotFound(String::from(
                 "moveboard in moveboards")))?;
-        let index = cast_spell(blockers, candidate, num_of_blockers);
+        let index = cast_spell(blocker_bb, magic, num_of_blockers);
 
         match out.get_mut(index) {
             Some(elem) => *elem = moveboard,
@@ -172,7 +207,7 @@ fn moves_from_magic(
         }
     }
 
-    out
+    Ok(out)
 }
 
 #[derive(Copy, Clone)]
@@ -397,6 +432,7 @@ fn build_blockers(blocker_mask: BitBoard) -> Vec<BitBoard> {
     out
 }
 
+// Constructs a moveboard given a slider on a square with a blockerboard.
 fn build_moveboard(
     piece: Slider,
     blocker_board: BitBoard,
@@ -422,14 +458,14 @@ pub fn find_magic(
     // Candidate magic number.
     let mut candidate:u64 = 0;
 
+    // Gets the number of blockers by counting the number of 1 bits.
     let num_of_blockers: u32 = blocker_mask.count_ones();
 
+    // THe exact size of the magic vactor.
     let table_size = 1usize << num_of_blockers;
 
     // cast_spell(blockers) is index in magic_movebards of moveboard.
     let mut magic_moveboards = Vec::new();
-
-    let mut max_index = 0;
 
     'search: loop {
         magic_moveboards = vec![BitBoard::new(); table_size];
@@ -466,10 +502,6 @@ pub fn find_magic(
                         "magic_bitboards at index"))),
                 }
             }
-
-            if index > max_index {
-                max_index = index;
-            }
         }
         break;
     }
@@ -491,7 +523,6 @@ pub fn search_magic(magic: Magic) {
         let mut moves = Vec::new();
 
         for blocker_set in &blockers {
-            // println!("Searching next blockers");
             let moveboard = build_moveboard(
                 Slider::Rook,
                 *blocker_set,
