@@ -102,14 +102,14 @@ pub(crate) fn cast_spell(
 // Returns moveboard for a slideing piece.
 pub fn get_moveboard(
     piece: Slider,
-    blockers: BitBoard
+    blockers: BitBoard,
     magic: &Magic,
 ) -> BitBoard {
     // Determine number of blockers.
     let num_of_blockers = blockers.bits.count_ones();
 
     // Get magic number.
-    let magic_number = 
+    let magic_number = 0;
 
     // Get magic index.
     let index = cast_spell(blockers, magic_number, num_of_blockers);
@@ -124,7 +124,7 @@ fn moves_from_blockers(
     piece: Slider,
     square: usize
 ) -> Vec<BitBoard> {
-    let moves = Vec::new();
+    let mut moves = Vec::new();
 
     for blocker_set in &blockers {
         let moveboard = build_moveboard(
@@ -150,7 +150,7 @@ fn moves_from_magic(
     mask: u64
 ) -> Result<Vec<BitBoard>> {
     let mut out = Vec::new();
-    let num_of_blockers: u32 = blocker_mask.count_ones();
+    let num_of_blockers: u32 = blockers.count_ones();
 
     let table_size = 1usize << num_of_blockers;
 

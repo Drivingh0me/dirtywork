@@ -1,8 +1,10 @@
 mod mcmath;
 mod bitboards;
 mod magic;
+
 pub use magic::initialize_magic;
 pub use magic::search_magic;
+use crate::dw_engine::magic::Magic;
 pub use bitboards::BitBoard;
 
 use crate::error::{Result, Error};
@@ -25,13 +27,13 @@ pub enum Piece {
     King(Color),
 }
 
-pub struct Move {
+pub struct MovePiece {
     piece: Piece,
-    // xor move with current piece bb to move piece.
-    // Move is 1 where piece was and 1 where piece is now.
-    move: BitBoard,
-    // and capture with all other piece's bb to remove piece that was captured
-    // if captured.
+    // xor before_and_after with current piece bb to move piece.
+    // before_and_after is 1 where piece was and 1 where piece is now.
+    before_and_after: BitBoard,
+    // Bitwise and capture with all other piece's bb to remove piece that was
+    // captured, if capture occurs.
     // Capture is all 1 except where piece was moved to.
     capture: BitBoard,
 }
@@ -169,7 +171,7 @@ pub fn dw_analysis(
 }
 
 // Calculate legal moves.
-fn legal_moves(state: &BoardState) -> Vec<Move> {
+fn legal_moves(state: &BoardState) -> Vec<MovePiece> {
     //
 }
 
