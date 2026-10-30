@@ -21,6 +21,7 @@ pub const B_MAGICS: [u64; 64] = include!(
     "../../magic/magic_bishop.txt"
 );
 
+#[derive(Copy, Clone)]
 enum Slider {
     Bishop,
     Rook,
@@ -128,8 +129,8 @@ pub fn get_moveboard(
 
     // Get moveboard from magic index.
     let move_boards = match piece {
-        Slider::Bishop => magic.bishop.move_boards,
-        Slider::Rook => magic.rook.move_boards,
+        Slider::Bishop => &magic.bishop.move_boards,
+        Slider::Rook => &magic.rook.move_boards,
     };
 
     let move_board = move_boards

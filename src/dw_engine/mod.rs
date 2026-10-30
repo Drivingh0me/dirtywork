@@ -38,11 +38,18 @@ pub struct MovePiece {
     capture: BitBoard,
 }
 
+pub const WHITE_OO: u8 = 0b0000_0001; // White short castle
+pub const WHITE_OOO: u8 = 0b0000_0010; // White long castle
+pub const BLACK_OO: u8 = 0b0000_0100; // black short castle
+pub const BLACK_OOO: u8 = 0b0000_1000; // Black long castle
+pub const NO_CASTLE: u8 = 0b0000_0000;
+pub const ANY_CASTLE: u8 = 0b0000_1111;
+
 // Stores if the rooks or kings have moved to stop casttle rights.
 #[derive(Debug, PartialEq, Clone, Copy)]
 struct CastleBool {
     // bits:
-    // can_sastle (1 is yes),
+    // can_castle (1 is yes),
     // w_king, b_king,
     // w_kingside_rook, w_queenside_rook,
     // b_kingside_rook, b_queenside_rook.
@@ -50,8 +57,25 @@ struct CastleBool {
 }
 
 impl CastleBool {
-    fn king(&mut self, color: Color) {
-        //
+    fn new() -> Self {
+        Self {
+            val: ANY_CASTLE,
+        }
+    }
+
+    /// Grant a specific castling right.
+    fn grant(&mut self, right: u8) {
+        self.val |= right;
+    }
+
+    /// Revoke a specific castling right.
+    fn revoke(&mut self, right: u8) {
+        self.val &= !right;
+    }
+
+    /// Check if a specific castling right is available.
+    fn has(&mut self, right: u8) -> bool {
+        (self.val & right) == right
     }
 }
 
@@ -73,7 +97,7 @@ pub struct BoardState {
     // Pawn that moved two squares in the previous turn.
     // Needs to leave behind a crumb as well.
     dbl_pawn: BitBoard,
-    has_moved: CastleBool,
+    castle: CastleBool,
 }
 
 impl BoardState {
@@ -93,6 +117,7 @@ impl BoardState {
             b_queen: BitBoard { bits: 0 },
             b_king: BitBoard { bits: 0 },
             dbl_pawn: BitBoard { bits: 0 },
+            castle: CastleBool::new(),
         }
     }
 }
@@ -115,6 +140,7 @@ impl Default for BoardState {
             b_queen: BitBoard { bits: 1152921504606846976 },
             b_king: BitBoard { bits: 576460752303423488 },
             dbl_pawn: BitBoard { bits: 0 },
+            castle: CastleBool::new(),
         }
     }
 }
@@ -173,7 +199,9 @@ pub fn dw_analysis(
 
 // Calculate legal moves.
 fn legal_moves(state: &BoardState) -> Vec<MovePiece> {
-    //
+    let mut out = Vec::<MovePiece>::new();
+
+    out
 }
 
 // Static evaluation.
