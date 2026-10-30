@@ -167,7 +167,8 @@ impl Default for GameState {
     }
 }
 
-// Returns the best move as a BoardState and the eval as a float.
+// Need to make this continuously return according to UCI standard, and can
+// stop. MAke it return depth, score, etc from UCI standard.
 pub fn dw_analysis(
     state: GameState,
     depth: usize,
@@ -201,6 +202,16 @@ pub fn dw_analysis(
 fn legal_moves(state: &BoardState) -> Vec<MovePiece> {
     let mut out = Vec::<MovePiece>::new();
 
+    // Get all moves for the jumpig pieces.
+
+    // Get all moves for the sliding pieces.
+    let rook_moves = get_moveboards(
+        Slider::Rook,
+        blockers,
+        &magic
+    );
+
+    // Remove the non-legal moves.
     out
 }
 

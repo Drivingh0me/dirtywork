@@ -88,8 +88,6 @@ impl PieceMagic {
 // The main fn called to initialize magic for the engine.
 pub fn initialize_magic() -> Magic {
     let mut out = Magic::new();
-
-    // Fill move_boards.
     out.fill_moves();
     out
 }
