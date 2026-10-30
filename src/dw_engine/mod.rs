@@ -16,72 +16,8 @@ pub enum Color {
     Black,
 }
 
-// TODO: Condense this to one byte.
-// color bit, then seven bits for piece (includes pawn crumb).
-pub enum Piece {
-    Pawn(Color),
-    Knight(Color),
-    Bishop(Color),
-    Rook(Color),
-    Queen(Color),
-    King(Color),
-}
-
-pub struct MovePiece {
-    piece: Piece,
-    // xor before_and_after with current piece bb to move piece.
-    // before_and_after is 1 where piece was and 1 where piece is now.
-    before_and_after: BitBoard,
-    // Bitwise and capture with all other piece's bb to remove piece that was
-    // captured, if capture occurs.
-    // Capture is all 1 except where piece was moved to.
-    capture: BitBoard,
-}
-
-pub const WHITE_OO: u8 = 0b0000_0001; // White short castle
-pub const WHITE_OOO: u8 = 0b0000_0010; // White long castle
-pub const BLACK_OO: u8 = 0b0000_0100; // black short castle
-pub const BLACK_OOO: u8 = 0b0000_1000; // Black long castle
-pub const NO_CASTLE: u8 = 0b0000_0000;
-pub const ANY_CASTLE: u8 = 0b0000_1111;
-
-// Stores if the rooks or kings have moved to stop casttle rights.
-#[derive(Debug, PartialEq, Clone, Copy)]
-struct CastleBool {
-    // bits:
-    // can_castle (1 is yes),
-    // w_king, b_king,
-    // w_kingside_rook, w_queenside_rook,
-    // b_kingside_rook, b_queenside_rook.
-    val: u8,
-}
-
-impl CastleBool {
-    fn new() -> Self {
-        Self {
-            val: ANY_CASTLE,
-        }
-    }
-
-    /// Grant a specific castling right.
-    fn grant(&mut self, right: u8) {
-        self.val |= right;
-    }
-
-    /// Revoke a specific castling right.
-    fn revoke(&mut self, right: u8) {
-        self.val &= !right;
-    }
-
-    /// Check if a specific castling right is available.
-    fn has(&mut self, right: u8) -> bool {
-        (self.val & right) == right
-    }
-}
-
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub struct BoardState {
-    tomove: Color,
     w_pawn: BitBoard,
     w_knight: BitBoard,
     w_bishop: BitBoard,
@@ -97,13 +33,12 @@ pub struct BoardState {
     // Pawn that moved two squares in the previous turn.
     // Needs to leave behind a crumb as well.
     dbl_pawn: BitBoard,
-    castle: CastleBool,
+    castle: Rights,
 }
 
 impl BoardState {
     fn new() -> Self {
         Self {
-            tomove: Color::White,
             w_pawn: BitBoard { bits: 0 },
             w_knight: BitBoard { bits: 0 },
             w_bishop: BitBoard { bits: 0 },
@@ -117,7 +52,7 @@ impl BoardState {
             b_queen: BitBoard { bits: 0 },
             b_king: BitBoard { bits: 0 },
             dbl_pawn: BitBoard { bits: 0 },
-            castle: CastleBool::new(),
+            castle: Rights::new(),
         }
     }
 }
@@ -196,23 +131,6 @@ pub fn dw_analysis(
 
     println!("ran analysis!");
     Ok((best_move, eval))
-}
-
-// Calculate legal moves.
-fn legal_moves(state: &BoardState) -> Vec<MovePiece> {
-    let mut out = Vec::<MovePiece>::new();
-
-    // Get all moves for the jumpig pieces.
-
-    // Get all moves for the sliding pieces.
-    let rook_moves = get_moveboards(
-        Slider::Rook,
-        blockers,
-        &magic
-    );
-
-    // Remove the non-legal moves.
-    out
 }
 
 // Static evaluation.
