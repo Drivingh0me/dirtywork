@@ -12,28 +12,33 @@ use crate::error::{Result, Error};
 #[derive(Debug, PartialEq, Default, Clone, Copy)]
 pub enum Color {
     #[default]
-    White,
-    Black,
+    White = 0,
+    Black = 1,
+}
+
+#[derive(Debug, PartialEq, Default, Clone, Copy)]
+pub enum Occupier {
+    White = 0,
+    Black = 1,
+    Both = 3,
+}
+
+#[derive(Copy, Clone, Debug)]
+pub enum PieceType {
+    Pawn = 0,
+    Knight = 1,
+    Bishop = 2,
+    Rook = 3,
+    Queen = 4,
+    King = 5,
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub struct BoardState {
-    w_pawn: BitBoard,
-    w_knight: BitBoard,
-    w_bishop: BitBoard,
-    w_rook: BitBoard,
-    w_queen: BitBoard,
-    w_king: BitBoard,
-    b_pawn: BitBoard,
-    b_knight: BitBoard,
-    b_bishop: BitBoard,
-    b_rook: BitBoard,
-    b_queen: BitBoard,
-    b_king: BitBoard,
-    // Pawn that moved two squares in the previous turn.
-    // Needs to leave behind a crumb as well.
-    dbl_pawn: BitBoard,
+    pieces: [[BitBoard; 6]; 2],
+    crumb: Square, // Square where you can capture the invisible pawn.
     castle: Rights,
+    occupancies: [BitBoard; 3],
 }
 
 impl BoardState {
