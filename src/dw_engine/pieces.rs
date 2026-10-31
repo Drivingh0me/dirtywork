@@ -1,16 +1,28 @@
 // This is the file for all of the stuff related to pices, like determining
 // moves and stuff.
 
+#[derive(Debug, PartialEq, Default, Clone, Copy)]
+pub enum Color {
+    #[default]
+    White = 0,
+    Black = 1,
+}
 
-// TODO: Condense this to one byte.
-// color bit, then seven bits for piece (includes pawn crumb).
-pub enum Piece {
-    Pawn(Color),
-    Knight(Color),
-    Bishop(Color),
-    Rook(Color),
-    Queen(Color),
-    King(Color),
+#[derive(Debug, PartialEq, Default, Clone, Copy)]
+pub enum Occupier {
+    White = 0,
+    Black = 1,
+    Both = 3,
+}
+
+#[derive(Copy, Clone, Debug)]
+pub enum PieceType {
+    Pawn = 0,
+    Knight = 1,
+    Bishop = 2,
+    Rook = 3,
+    Queen = 4,
+    King = 5,
 }
 
 // Make a movelist that is stack alocated and can hold up to 256 moves.
