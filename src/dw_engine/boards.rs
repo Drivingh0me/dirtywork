@@ -42,6 +42,10 @@ impl Square {
     }
 }
 
+// impl Div for Square {
+//
+// }
+
 // Hopping piece movements.
 pub const K_MOVS: [u64; 64] = include!(
     "../../bitboard_generator/bitboards/k.txt"
@@ -147,8 +151,8 @@ impl Location {
 }
 
 pub(crate) fn location(square: Square) -> Location {
-    let x = square % 8;
-    let y = square / 8;
+    let x = square.bits % 8;
+    let y = square.bits / 8;
     let out: Location = Location { x: x, y: y };
     out
 }

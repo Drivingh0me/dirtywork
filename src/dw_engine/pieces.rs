@@ -1,7 +1,8 @@
 // This is the file for all of the stuff related to pices, like determining
 // moves and stuff.
 
-use super::boards::{BitBoard};
+use super::boards::*;
+use crate::dw_engine::magic::{Slider};
 
 #[derive(Debug, PartialEq, Default, Clone, Copy)]
 pub enum Color {
