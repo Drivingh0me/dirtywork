@@ -1,13 +1,15 @@
 use std::collections::HashSet;
 
+use super::pieces::{PieceType};
+use super::boards::{BitBoard};
+
 use crate::error::{Result, Error};
-use crate::dw_engine::BitBoard;
-use crate::dw_engine::bitboards;
+
 
 // Notes ----------------------------------------------------------------------
 // Magic is used to calculate the movebaord for sliders.
 // Moveboards for hoppers are precalculated completely and
-// storred in bitboards.rs.
+// storred in boards.rs.
 // ----------------------------------------------------------------------------
 
 // TODO: Make this all multithreaded and clean up to c style fn order.
@@ -58,8 +60,8 @@ impl PieceMagic {
         Self {
             move_boards: std::array::from_fn(|_| Vec::new()),
             blocker_masks: match slider {
-                Slider::Bishop => bitboards::B_MASK,
-                Slider::Rook => bitboards::R_MASK,
+                Slider::Bishop => boards::B_MASK,
+                Slider::Rook => boards::R_MASK,
             },
             magic_numbers: match slider {
                 Slider::Bishop => B_MAGICS,
@@ -142,7 +144,7 @@ pub fn get_moveboard(
     *out
 }
 
-// Creates a vector of bitboards that is all of the moves for a piece on
+// Creates a vector of boards that is all of the moves for a piece on
 // a square given certain blockers.
 fn moves_from_blockers(
     blockers: &Vec<BitBoard>,
@@ -202,7 +204,7 @@ fn moves_from_magic(
         match out.get_mut(index) {
             Some(elem) => *elem = moveboard,
             None => return Err(Error::FailedMutate(String::from(
-                "magic_bitboards at index"))),
+                "magic_boards at index"))),
         }
     }
 
@@ -236,7 +238,7 @@ impl MtxBoard {
         Ok(())
     }
 
-    fn see(&self, location: bitboards::Location) -> Result<SquareOccupancy> {
+    fn see(&self, location: boards::Location) -> Result<SquareOccupancy> {
         let index = location.square()?;
 
         self.board.get(index).ok_or(Error::VectorSize).copied()
@@ -246,7 +248,7 @@ impl MtxBoard {
         for row in (0..8).rev() {
             let mut a = Vec::new();
             for col in 0..8 {
-                let location = bitboards::Location{ x: col, y: row };
+                let location = boards::Location{ x: col, y: row };
                 let occupancy = self.see(location).unwrap();
                 let occ = match occupancy {
                     SquareOccupancy::Blocker => "1",
@@ -260,8 +262,8 @@ impl MtxBoard {
     }
 
     fn step(&mut self,
-        slide: impl Fn(bitboards::Location, usize) -> bitboards::Location,
-        square: bitboards::Location,
+        slide: impl Fn(boards::Location, usize) -> boards::Location,
+        square: boards::Location,
         end: usize,
     ) -> Result<()> {
         for i in 1..end {
@@ -292,7 +294,7 @@ impl MtxBoard {
     }
 
     fn moves(&mut self, piece: Slider, square: usize) -> Result<()> {
-        let piece_location = bitboards::location(square);
+        let piece_location = boards::location(square);
         // Determine loop sizes for cardinal directions.
         let north = 8-piece_location.y;
         let south = piece_location.y;
@@ -386,7 +388,7 @@ impl MtxBoard {
         let mut out = BitBoard::new();
         for square in 0..64 {
             match self
-                .see(bitboards::location(square))
+                .see(boards::location(square))
                 .unwrap_or(SquareOccupancy::Empty)
             {
                 SquareOccupancy::Myself => out.bits |= 1u64 << square,
@@ -498,7 +500,7 @@ pub fn find_magic(
                 match magic_moveboards.get_mut(index) {
                     Some(elem) => *elem = moveboard,
                     None => return Err(Error::FailedMutate(String::from(
-                        "magic_bitboards at index"))),
+                        "magic_boards at index"))),
                 }
             }
         }
@@ -516,7 +518,7 @@ pub fn search_magic(magic: Magic) {
 
     // Find a magic number for each square for rook.
     for square in 0.. 64 {
-        // Generate bitboards for this square.
+        // Generate boards for this square.
         let mask = BitBoard::set_val(magic.rook.blocker_masks[square]);
         let blockers = build_blockers(mask);
         let mut moves = Vec::new();
@@ -541,7 +543,7 @@ pub fn search_magic(magic: Magic) {
 
     // Find a magic number for each sqaure for bishop.
     for square in 0.. 64 {
-        // Generate bitboards for this square.
+        // Generate boards for this square.
         let mask = BitBoard::set_val(magic.bishop.blocker_masks[square]);
         let blockers = build_blockers(mask);
         let mut moves = Vec::new();

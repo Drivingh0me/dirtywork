@@ -2,7 +2,7 @@ use supports_color::Stream;
 
 use crate::error::{Error, Result};
 
-use crate::dw_engine::{BoardState, Piece, Color};
+use crate::dw_engine::{BoardState, PieceType, Color};
 use crate::dw_engine::{get_piece_coords};
 
 // TODO: Check if terminal supports more colors then do better board
@@ -34,18 +34,18 @@ struct PrintableBoard {
 impl PrintableBoard {
     fn getfrom (board: BoardState) -> Self {
         Self {
-            w_pawn: get_piece_coords(&board, &Piece::Pawn(Color::White)),
-            w_knight: get_piece_coords(&board, &Piece::Knight(Color::White)),
-            w_bishop: get_piece_coords(&board, &Piece::Bishop(Color::White)),
-            w_rook: get_piece_coords(&board, &Piece::Rook(Color::White)),
-            w_queen: get_piece_coords(&board, &Piece::Queen(Color::White)),
-            w_king: get_piece_coords(&board, &Piece::King(Color::White)),
-            b_pawn: get_piece_coords(&board, &Piece::Pawn(Color::Black)),
-            b_knight: get_piece_coords(&board, &Piece::Knight(Color::Black)),
-            b_bishop: get_piece_coords(&board, &Piece::Bishop(Color::Black)),
-            b_rook: get_piece_coords(&board, &Piece::Rook(Color::Black)),
-            b_queen: get_piece_coords(&board, &Piece::Queen(Color::Black)),
-            b_king: get_piece_coords(&board, &Piece::King(Color::Black)),
+            w_pawn: get_piece_coords(&board, &PieceType::Pawn(Color::White)),
+            w_knight: get_piece_coords(&board, &PieceType::Knight(Color::White)),
+            w_bishop: get_piece_coords(&board, &PieceType::Bishop(Color::White)),
+            w_rook: get_piece_coords(&board, &PieceType::Rook(Color::White)),
+            w_queen: get_piece_coords(&board, &PieceType::Queen(Color::White)),
+            w_king: get_piece_coords(&board, &PieceType::King(Color::White)),
+            b_pawn: get_piece_coords(&board, &PieceType::Pawn(Color::Black)),
+            b_knight: get_piece_coords(&board, &PieceType::Knight(Color::Black)),
+            b_bishop: get_piece_coords(&board, &PieceType::Bishop(Color::Black)),
+            b_rook: get_piece_coords(&board, &PieceType::Rook(Color::Black)),
+            b_queen: get_piece_coords(&board, &PieceType::Queen(Color::Black)),
+            b_king: get_piece_coords(&board, &PieceType::King(Color::Black)),
         }
     }
 }

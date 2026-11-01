@@ -2,9 +2,9 @@ mod boards;
 mod magic;
 mod pieces;
 
-pub use magic::initialize_magic;
-pub use magic::search_magic;
-pub use boards::BitBoard;
+pub use magic::{initialize_magic, search_magic};
+pub use boards::{BitBoard, BoardState};
+pub use pieces::{PieceType, Color};
 use crate::dw_engine::magic::Magic;
 use crate::dw_engine::pieces::{Moov};
 use crate::dw_engine::boards::{Square};
