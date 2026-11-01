@@ -26,8 +26,11 @@ pub enum PieceType {
 }
 
 // Make a movelist that is stack alocated and can hold up to 256 moves.
+pub(crate) struct MoovList {
+    moov: [Moov; 256],
+}
 
-pub struct MovePiece {
+pub struct Moov {
     // First 6 bits are from square, second 6 bits are to square,
     // last 4 bits are flags:
     // Normal move,
@@ -41,7 +44,7 @@ pub struct MovePiece {
     // White ong castle,
     // Black short castle,
     // Black long castle,
-    val: u16,
+    bits: u16,
 }
 
 pub const WHITE_TO_MOVE: u8 = 0b1000_0000; // White's turn to move.
@@ -57,40 +60,40 @@ pub const DEFAULT_RIGHTS: u8 = 0b1000_1111;
 // Stores if the rooks or kings have moved to stop casttle rights.
 #[derive(Debug, PartialEq, Clone, Copy)]
 struct Rights {
-    val: u8,
+    bits: u8,
 }
 
 impl Rights {
     fn new() -> Self {
         Self {
-            val: DEFAULT_RIGHTS,
+            bits: DEFAULT_RIGHTS,
         }
     }
 
     /// Grant a specific castling right.
     fn grant(&mut self, right: u8) {
-        self.val |= right;
+        self.bits |= right;
     }
 
     /// Revoke a specific castling right.
     fn revoke(&mut self, right: u8) {
-        self.val &= !right;
+        self.bits &= !right;
     }
 
     /// Check if a specific castling right is available.
     fn has(&mut self, right: u8) -> bool {
-        (self.val & right) == right
+        (self.bits & right) == right
     }
 }
 
 // Calculate legal moves.
-fn legal_moves(state: &BoardState) -> Vec<MovePiece> {
-    let mut out = Vec::<MovePiece>::new();
+fn legal_moovs(state: &BoardState) -> Vec<Moov> {
+    let mut out = Vec::<Moov>::new();
 
     // Get all moves for the jumping pieces.
 
     // Get all moves for the sliding pieces.
-    let rook_moves = get_moveboards(
+    let rook_moovs = get_moveboards(
         Slider::Rook,
         blockers,
         &magic

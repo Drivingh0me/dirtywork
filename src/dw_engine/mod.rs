@@ -1,11 +1,13 @@
-mod mcmath;
-mod bitboards;
+mod boards;
 mod magic;
+mod pieces;
 
 pub use magic::initialize_magic;
 pub use magic::search_magic;
+pub use boards::BitBoard;
 use crate::dw_engine::magic::Magic;
-pub use bitboards::BitBoard;
+use crate::dw_engine::pieces::{Moov};
+use crate::dw_engine::boards::{Square};
 
 use crate::error::{Result, Error};
 
@@ -32,7 +34,8 @@ impl Default for GameState {
 }
 
 // Need to make this continuously return according to UCI standard, and can
-// stop. MAke it return depth, score, etc from UCI standard.
+// stop. Make it return depth, score, etc  that can be parsed to
+// form a UCI standard stdout through UI.
 pub fn dw_analysis(
     state: GameState,
     depth: usize,
@@ -144,39 +147,6 @@ pub fn get_piece_coords(board: &BoardState, piece: &Piece) -> Vec<(u8, u8)> {
     //=========================================================================
 
     pieces
-}
-
-fn get_bitboard(board: &BoardState, piece: &Piece) -> BitBoard {
-    let bitboard: BitBoard = match piece {
-        Piece::Pawn(color) => match color {
-            Color::White => board.w_pawn,
-            Color::Black => board.b_pawn,
-        }
-        Piece::Knight(color) => match color {
-            Color::White => board.w_knight,
-            Color::Black => board.b_knight,
-        }
-        Piece::Bishop(color) => match color {
-            Color::White => board.w_bishop,
-            Color::Black => board.b_bishop,
-        }
-        Piece::Rook(color) => match color {
-            Color::White => board.w_rook,
-            Color::Black => board.b_rook,
-        }
-        Piece::Queen(color) => match color {
-            Color::White => board.w_queen,
-            Color::Black => board.b_queen,
-        }
-        Piece::King(color) => match color {
-            Color::White => board.w_king,
-            Color::Black => board.b_king,
-        }
-        _ => board.dbl_pawn,
-    };
-
-    bitboard
-
 }
 
 #[cfg(test)]

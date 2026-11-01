@@ -141,3 +141,36 @@ pub(crate) fn location(square: usize) -> Location {
     let out: Location = Location { x: x, y: y };
     out
 }
+
+fn get_bitboard(board: &BoardState, piece: &Piece) -> BitBoard {
+    let bitboard: BitBoard = match piece {
+        Piece::Pawn(color) => match color {
+            Color::White => board.w_pawn,
+            Color::Black => board.b_pawn,
+        }
+        Piece::Knight(color) => match color {
+            Color::White => board.w_knight,
+            Color::Black => board.b_knight,
+        }
+        Piece::Bishop(color) => match color {
+            Color::White => board.w_bishop,
+            Color::Black => board.b_bishop,
+        }
+        Piece::Rook(color) => match color {
+            Color::White => board.w_rook,
+            Color::Black => board.b_rook,
+        }
+        Piece::Queen(color) => match color {
+            Color::White => board.w_queen,
+            Color::Black => board.b_queen,
+        }
+        Piece::King(color) => match color {
+            Color::White => board.w_king,
+            Color::Black => board.b_king,
+        }
+        _ => board.dbl_pawn,
+    };
+
+    bitboard
+
+}
