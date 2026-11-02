@@ -239,7 +239,7 @@ impl MtxBoard {
     }
 
     fn see(&self, location: boards::Location) -> Result<SquareOccupancy> {
-        let index = location.square()?;
+        let index = location.index();
 
         self.board.get(index).ok_or(Error::VectorSize).copied()
     }
@@ -271,13 +271,13 @@ impl MtxBoard {
             match self.see(location)? {
                 SquareOccupancy::Empty => {
                     self.set(
-                        location.square()?,
+                        location.index(),
                         SquareOccupancy::Myself
                     )?;
                 },
                 SquareOccupancy::Blocker => {
                     self.set(
-                        location.square()?,
+                        location.index(),
                         SquareOccupancy::Myself
                     )?;
                     break;
@@ -293,7 +293,7 @@ impl MtxBoard {
         Ok(())
     }
 
-    fn moves(&mut self, piece: Slider, square: usize) -> Result<()> {
+    fn moves(&mut self, piece: Slider, square: Square) -> Result<()> {
         let piece_location = boards::location(square);
         // Determine loop sizes for cardinal directions.
         let north = 8-piece_location.y;
@@ -388,7 +388,7 @@ impl MtxBoard {
         let mut out = BitBoard::new();
         for square in 0..64 {
             match self
-                .see(boards::location(square))
+                .see(boards::location(Square::set(square)))
                 .unwrap_or(SquareOccupancy::Empty)
             {
                 SquareOccupancy::Myself => out.bits |= 1u64 << square,
@@ -443,7 +443,7 @@ fn build_moveboard(
     let mut board = blockerboard_to_mtxboard(blocker_board)?;
 
     // Find all squares the piece can move to or capture on.
-    board.moves(piece, square)?;
+    board.moves(piece, Square::set(square as u8))?;
 
     // Convert that MtxBoard to BitBoard.
     Ok(board.to_moveboard())

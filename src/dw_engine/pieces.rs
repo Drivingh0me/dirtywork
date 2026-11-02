@@ -2,7 +2,7 @@
 // moves and stuff.
 
 use crate::dw_engine::boards::*;
-use crate::dw_engine::magic::{self, Slider};
+use crate::dw_engine::magic::{self};
 
 #[derive(Debug, PartialEq, Default, Clone, Copy)]
 pub enum Color {
@@ -54,11 +54,12 @@ impl MoovList {
     }
 
     pub(crate) fn push(&mut self, moov: Moov) {
-        self.moovs[self.len] = m;
-        slef.len += 1;
+        self.moovs[self.len] = moov;
+        self.len += 1;
     }
 }
 
+#[derive(Copy, Clone, Debug)]
 pub(crate) struct Moov {
     // First 6 bits are from square, second 6 bits are to square,
     // last 4 bits are flags:
@@ -73,7 +74,17 @@ pub(crate) struct Moov {
     // White ong castle,
     // Black short castle,
     // Black long castle,
+    // Not a move,
     bits: u16,
+}
+
+impl Moov {
+    pub(crate) fn new() -> Self {
+        Self { bits: 0 }
+    }
+    pub(crate) fn none() -> Self {
+        Self { bits: 0 }
+    }
 }
 
 pub(crate) const WHITE_TO_MOVE: u8 = 0b1000_0000; // White's turn to move.
@@ -115,18 +126,33 @@ impl Rights {
     }
 }
 
+fn get_moovs(
+    state: &BoardState,
+    piece: PieceType,
+    color: Color,
+    square: Square
+) -> Moov {
+    let mut out = Moov::new();
+    out
+}
+
 // Calculate legal moves.
-pub(crate) fn legal_moovs(state: &BoardState) -> Vec<Moov> {
-    let mut out = Vec::<Moov>::new();
+pub(crate) fn legal_moovs(state: &BoardState) -> MoovList {
+    let mut out = MoovList::new();
+
+    // Determine what color is to move.
+    let color = Color::White;
 
     // Get all moves for the jumping pieces.
 
     // Get all moves for the sliding pieces.
     for piece in PieceType::ALL.iter() {
-        let squares_piecetype_occupies = state.squares(piece);
+        let squares_piecetype_occupies = state.squares(*piece, color);
         for square in squares_piecetype_occupies {
             let moovs = get_moovs(
-                piece,
+                state,
+                *piece,
+                color,
                 square
             );
         }

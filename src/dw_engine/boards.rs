@@ -13,6 +13,7 @@ pub struct BitBoard {
     pub bits: u64,
 }
 
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Square {
     // 64 is invalid.
     bits: u8, // From a1 -> h1 -> b1 -> h8.
@@ -43,6 +44,19 @@ impl Square {
 
     pub(crate) fn set(val: u8) -> Self {
         Self { bits: val }
+    }
+
+    /// Check if square is valid.
+    pub(crate) fn check(&self) -> bool {
+        if self.bits > 63 {
+            return false;
+        }
+
+        true
+    }
+
+    pub(crate) fn err() -> Self {
+        Self { bits: 64 }
     }
 }
 
@@ -88,7 +102,7 @@ pub const B_MASK: [u64; 64] = include!(
 pub struct BoardState {
     pieces: [[BitBoard; 6]; 2],
     crumb: Square, // Square where you can capture the invisible pawn.
-    castle: Rights,
+    rights: Rights,
     occupancies: [BitBoard; 3],
 }
 
@@ -97,7 +111,7 @@ impl BoardState {
         Self {
             pieces: [[BitBoard::new(); 6]; 2],
             crumb: Square::none(),
-            castle: Rights::new(),
+            rights: Rights::new(),
             occupancies: [BitBoard::new(); 3],
         }
     }
@@ -105,16 +119,18 @@ impl BoardState {
     pub(crate) fn squares(&self,
         piece: PieceType,
         color: Color
-    ) -> [Square; 8] {
-        let mut squares = [Square::none(); 8];
+    ) -> [Square; 10] {
+        let mut squares = [Square::none(); 10];
         let mut index = 0;
+        let mut bb = self.pieces[color as usize][piece as usize].bits;
 
-        while bb != 0 {
+        // 10 is the max number of pieces of a type possible, Squares is
+        // Square::none terminated or last is 10.
+        while bb != 0 && index < 10 {
             // Get the index of the lowest set bit (0-63).
             let square = bb.trailing_zeros() as u8;
 
-            pieces.push((file, rank));
-            squares[index] = Square::set_val(square);
+            squares[index] = Square::set(square);
             index += 1;
 
             // Clear the lowest set bit.
@@ -130,9 +146,23 @@ impl Default for BoardState {
     /// Sets starting position for all pieces.
     fn default() -> Self {
         Self{
-            pieces: [[BitBoard::new(); 6]; 2],
+            pieces: [[
+                BitBoard::set_val(65280),
+                BitBoard::set_val(66),
+                BitBoard::set_val(36),
+                BitBoard::set_val(129),
+                BitBoard::set_val(16),
+                BitBoard::set_val(8),
+            ], [
+                BitBoard::set_val(71776119061217280),
+                BitBoard::set_val(4755801206503243776),
+                BitBoard::set_val(2594073385365405696),
+                BitBoard::set_val(9295429630892703744),
+                BitBoard::set_val(1152921504606846976),
+                BitBoard::set_val(576460752303423488),
+            ]],
             crumb: Square::none(),
-            castle: Rights::new(),
+            rights: Rights::new(),
             occupancies: [BitBoard::new(); 3],
 
             // tomove: Color::White,
@@ -161,34 +191,37 @@ pub(crate) struct Location {
     pub y: usize,
 }
 
-#[derive(Clone, Copy)]
 pub(crate) struct LongNotation {
     pub string: String,
 }
 
 impl Location {
     pub(crate) fn square(self) -> Square {
-        let out: usize = self.x + self.y *8;
-        if out > 63 {
-            return Square { bits: 64 };
+        let out = Square::set((self.x + self.y * 8) as u8);
+        if out.check() {
+            return Square::err();
         }
 
         out
+    }
+
+    pub(crate) fn index(self) -> usize {
+        self.x + self.y * 8
     }
 }
 
 pub(crate) fn location(square: Square) -> Location {
     let x = square.bits % 8;
     let y = square.bits / 8;
-    let out: Location = Location { x: x, y: y };
+    let out: Location = Location { x: x as usize, y: y as usize };
     out
 }
 
 /// Get the bitboard of a piece in the BoardState.
 fn get_bb(
     board: &BoardState,
-    piece: &PieceType,
-    color: &Color
+    piece: PieceType,
+    color: Color
 ) -> BitBoard {
-    board.pieces[color][piece];
+    board.pieces[color as usize][piece as usize]
 }
