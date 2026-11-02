@@ -40,6 +40,10 @@ impl Square {
     pub fn none() -> Self {
         Self { bits: 65 }
     }
+
+    pub(crate) fn set(val: u8) -> Self {
+        Self { bits: val }
+    }
 }
 
 // impl Div for Square {
@@ -102,8 +106,23 @@ impl BoardState {
         piece: PieceType,
         color: Color
     ) -> [Square; 8] {
-        // Find then return all of the squares that piecetype of that
-        // color are on.
+        let mut squares = [Square::none(); 8];
+        let mut index = 0;
+
+        while bb != 0 {
+            // Get the index of the lowest set bit (0-63).
+            let square = bb.trailing_zeros() as u8;
+
+            pieces.push((file, rank));
+            squares[index] = Square::set_val(square);
+            index += 1;
+
+            // Clear the lowest set bit.
+            bb &= bb - 1;
+            // Find then return all of the squares that piecetype of that
+            // color are on.
+        }
+        squares
     }
 }
 
