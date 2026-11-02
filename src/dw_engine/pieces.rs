@@ -1,8 +1,8 @@
 // This is the file for all of the stuff related to pices, like determining
 // moves and stuff.
 
-use super::boards::*;
-use crate::dw_engine::magic::{Slider};
+use crate::dw_engine::boards::*;
+use crate::dw_engine::magic::{self, Slider};
 
 #[derive(Debug, PartialEq, Default, Clone, Copy)]
 pub enum Color {
@@ -28,9 +28,35 @@ pub enum PieceType {
     King = 5,
 }
 
+impl PieceType {
+    const ALL: [Self; 6] = [
+        PieceType::Pawn,
+        PieceType::Knight,
+        PieceType::Bishop,
+        PieceType::Rook,
+        PieceType::Queen,
+        PieceType::King,
+    ];
+}
+
 // Make a movelist that is stack alocated and can hold up to 256 moves.
 pub(crate) struct MoovList {
-    moov: [Moov; 256],
+    moovs: [Moov; 256],
+    len: usize, // Length of the array.
+}
+
+impl MoovList {
+    pub(crate) fn new() -> Self {
+        Self {
+            moovs: [Moov::none(); 256],
+            len: 0,
+        }
+    }
+
+    pub(crate) fn push(&mut self, moov: Moov) {
+        self.moovs[self.len] = m;
+        slef.len += 1;
+    }
 }
 
 pub(crate) struct Moov {
@@ -96,11 +122,15 @@ pub(crate) fn legal_moovs(state: &BoardState) -> Vec<Moov> {
     // Get all moves for the jumping pieces.
 
     // Get all moves for the sliding pieces.
-    let rook_moovs = get_moveboards(
-        Slider::Rook,
-        blockers,
-        &magic
-    );
+    for piece in PieceType::ALL.iter() {
+        let squares_piecetype_occupies = state.squares(piece);
+        for square in squares_piecetype_occupies {
+            let moovs = get_moovs(
+                piece,
+                square
+            );
+        }
+    }
 
     // Remove the non-legal moves.
     out

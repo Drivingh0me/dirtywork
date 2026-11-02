@@ -97,6 +97,14 @@ impl BoardState {
             occupancies: [BitBoard::new(); 3],
         }
     }
+
+    pub(crate) fn squares(&self,
+        piece: PieceType,
+        color: Color
+    ) -> [Square; 8] {
+        // Find then return all of the squares that piecetype of that
+        // color are on.
+    }
 }
 
 impl Default for BoardState {
@@ -157,39 +165,11 @@ pub(crate) fn location(square: Square) -> Location {
     out
 }
 
-fn get_bitboard(
+/// Get the bitboard of a piece in the BoardState.
+fn get_bb(
     board: &BoardState,
     piece: &PieceType,
     color: &Color
 ) -> BitBoard {
-    let bitboard: BitBoard = match piece {
-        Piece::Pawn(color) => match color {
-            Color::White => board.w_pawn,
-            Color::Black => board.b_pawn,
-        }
-        Piece::Knight(color) => match color {
-            Color::White => board.w_knight,
-            Color::Black => board.b_knight,
-        }
-        Piece::Bishop(color) => match color {
-            Color::White => board.w_bishop,
-            Color::Black => board.b_bishop,
-        }
-        Piece::Rook(color) => match color {
-            Color::White => board.w_rook,
-            Color::Black => board.b_rook,
-        }
-        Piece::Queen(color) => match color {
-            Color::White => board.w_queen,
-            Color::Black => board.b_queen,
-        }
-        Piece::King(color) => match color {
-            Color::White => board.w_king,
-            Color::Black => board.b_king,
-        }
-        _ => board.dbl_pawn,
-    };
-
-    bitboard
-
+    board.pieces[color][piece];
 }
