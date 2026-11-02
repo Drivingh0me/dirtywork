@@ -140,6 +140,15 @@ impl BoardState {
         }
         squares
     }
+
+    /// Get the bitboard of a piece in the BoardState.
+    pub(crate) fn get_bb(
+        &self,
+        piece: PieceType,
+        color: Color
+    ) -> BitBoard {
+        self.pieces[color as usize][piece as usize]
+    }
 }
 
 impl Default for BoardState {
@@ -217,11 +226,3 @@ pub(crate) fn location(square: Square) -> Location {
     out
 }
 
-/// Get the bitboard of a piece in the BoardState.
-fn get_bb(
-    board: &BoardState,
-    piece: PieceType,
-    color: Color
-) -> BitBoard {
-    board.pieces[color as usize][piece as usize]
-}
