@@ -101,16 +101,16 @@ fn aggression(state: &BoardState) -> f32 {
 }
 
 fn count_material(state: &BoardState) -> f32 {
-    let p = how_many(state.get_bb(PieceType::Pawn, Color::White))
-        - how_many(state.get_bb(PieceType::Pawn, Color::Black));
-    let n = how_many(state.get_bb(PieceType::Knight, Color::White))
-        - how_many(state.get_bb(PieceType::Knight, Color::Black));
-    let b = how_many(state.get_bb(PieceType::Bishop, Color::White))
-        - how_many(state.get_bb(PieceType::Bishop, Color::Black));
-    let r = how_many(state.get_bb(PieceType::Rook, Color::White))
-        - how_many(state.get_bb(PieceType::Rook, Color::Black));
-    let q = how_many(state.get_bb(PieceType::Queen, Color::White))
-        - how_many(state.get_bb(PieceType::Queen, Color::Black));
+    let p = state.get_bb(PieceType::Pawn, Color::White).how_many()
+        - state.get_bb(PieceType::Pawn, Color::Black).how_many();
+    let n = state.get_bb(PieceType::Knight, Color::White).how_many()
+        - state.get_bb(PieceType::Knight, Color::Black).how_many();
+    let b = state.get_bb(PieceType::Bishop, Color::White).how_many()
+        - state.get_bb(PieceType::Bishop, Color::Black).how_many();
+    let r = state.get_bb(PieceType::Rook, Color::White).how_many()
+        - state.get_bb(PieceType::Rook, Color::Black).how_many();
+    let q = state.get_bb(PieceType::Queen, Color::White).how_many()
+        - state.get_bb(PieceType::Queen, Color::Black).how_many();
 
     let p = p as f32;
     let n = n as f32;
@@ -119,11 +119,6 @@ fn count_material(state: &BoardState) -> f32 {
     let q = q as f32;
 
     1.0 * p + 3.0 * n + 3.0 * b + 5.0 * r + 9.0 * q
-}
-
-// Calculates how many pieces there are.
-fn how_many(piece: BitBoard) -> u32 {
-    piece.bits.count_ones()
 }
 
 fn measure_control(state: &BoardState) -> f32 {

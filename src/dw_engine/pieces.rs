@@ -224,6 +224,8 @@ pub(crate) fn legal_moovs(state: &BoardState, magic: &Magic) -> MoovList {
         let squares_piecetype_occupies = state.squares(*piece, color);
 
         for square in squares_piecetype_occupies {
+            let from_square = square.bits();
+
             if square == Square::none() {
                 break;
             }
@@ -235,6 +237,31 @@ pub(crate) fn legal_moovs(state: &BoardState, magic: &Magic) -> MoovList {
                 square,
                 magic
             );
+
+            // let moveboard_move_quant = moveboard.how_many() as usize;
+            //
+            // for moov_index in 0..moveboard_move_quant {
+            //     //
+            // }
+
+            let mut index = 0;
+            let mut bb = moveboard.bits;
+            while bb != 0 {
+                let mut moov = Moov::new();
+
+                // Set start square for moov.
+                moov.bits |= from_square;
+
+                // Get the index of the lowest set bit (0-63).
+                let to_square = bb.trailing_zeros() as u16;
+
+                moov.bits |= (to_square << 6);
+
+                // Clear the lowest set bit.
+                bb &= bb - 1;
+
+                out.push(moov);
+            }
         }
     }
 

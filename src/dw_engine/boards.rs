@@ -27,7 +27,12 @@ impl BitBoard {
     pub fn set_val(val: u64) -> Self {
         Self { bits: val }
     }
-    //
+
+    /// Calculates how many pieces there are.
+    pub fn how_many(self) -> u32 {
+        self.bits.count_ones()
+    }
+
     // pub fn start(piece: PieceType, color: Color) -> Self {
     //     Self { bits: }
     // }
@@ -61,6 +66,14 @@ impl Square {
 
     pub(crate) fn err() -> Self {
         Self { bits: 64 }
+    }
+
+    pub(crate) fn bits(&self) -> u16 {
+        if self.bits > 63 {
+            panic!("Tried to get square bits while err");
+            return 0;
+        }
+        self.bits as u16
     }
 }
 
