@@ -42,7 +42,7 @@ impl PieceType {
 // Make a movelist that is stack alocated and can hold up to 256 moves.
 pub(crate) struct MoovList {
     moovs: [Moov; 256],
-    len: usize, // Length of the array.
+    len: u8, // Length of the array.
 }
 
 impl MoovList {
@@ -54,7 +54,11 @@ impl MoovList {
     }
 
     pub(crate) fn push(&mut self, moov: Moov) {
-        self.moovs[self.len] = moov;
+        if self.len > 255 {
+            // Make this not silent.
+            return ();
+        }
+        self.moovs[self.len as usize] = moov;
         self.len += 1;
     }
 }
@@ -84,6 +88,29 @@ impl Moov {
     }
     pub(crate) fn none() -> Self {
         Self { bits: 0 }
+    }
+}
+
+struct MoovPiece {
+    moovs: [Moov; 27],
+    len: u8,
+}
+
+impl MoovPiece {
+    fn new() -> Self {
+        Self {
+            moovs: [Moov::new(); 27],
+            len: 0,
+        }
+    }
+
+    fn push(&mut self, moov: Moov) {
+        if self.len > 26 {
+            // Make this not silent.
+            return ();
+        }
+        self.moovs[self.len as usize] = moov;
+        self.len += 1;
     }
 }
 
@@ -126,12 +153,13 @@ impl Rights {
     }
 }
 
+/// Get all of the moves one piece on one square can make.
 fn get_moovs(
     state: &BoardState,
     piece: PieceType,
     color: Color,
     square: Square
-) -> Moov {
+) -> MoovPiece {
     let mut out = Moov::new();
     out
 }
@@ -148,6 +176,8 @@ pub(crate) fn legal_moovs(state: &BoardState) -> MoovList {
     // Get all moves for the sliding pieces.
     for piece in PieceType::ALL.iter() {
         let squares_piecetype_occupies = state.squares(*piece, color);
+
+        // Make this end when index is over or at max.
         for square in squares_piecetype_occupies {
             let moovs = get_moovs(
                 state,
