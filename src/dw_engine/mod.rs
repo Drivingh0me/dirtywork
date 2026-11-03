@@ -125,7 +125,7 @@ fn measure_control(state: &BoardState) -> f32 {
 
 pub fn get_piece_coords(
     board: &BoardState,
-    piece: PieceType, 
+    piece: PieceType,
     color: Color
 ) -> Vec<(u8, u8)> {
     let bitboard = board.get_bb(piece, color);

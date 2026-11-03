@@ -5,16 +5,6 @@ use crate::error::{Error, Result};
 use crate::dw_engine::{BoardState, PieceType, Color};
 use crate::dw_engine::{get_piece_coords};
 
-// TODO: Check if terminal supports more colors then do better board
-//       colors than the universal colors. Default to universal colors.
-
-enum ColorDepth {
-    Millions,
-    Hundreds,
-    Sixteen,
-    No_Colors,
-}
-
 #[derive(Debug)]
 struct PrintableBoard {
     w_pawn: Vec<(u8, u8)>,
@@ -34,36 +24,20 @@ struct PrintableBoard {
 impl PrintableBoard {
     fn getfrom (board: BoardState) -> Self {
         Self {
-            w_pawn: get_piece_coords(&board, &PieceType::Pawn(Color::White)),
-            w_knight: get_piece_coords(&board, &PieceType::Knight(Color::White)),
-            w_bishop: get_piece_coords(&board, &PieceType::Bishop(Color::White)),
-            w_rook: get_piece_coords(&board, &PieceType::Rook(Color::White)),
-            w_queen: get_piece_coords(&board, &PieceType::Queen(Color::White)),
-            w_king: get_piece_coords(&board, &PieceType::King(Color::White)),
-            b_pawn: get_piece_coords(&board, &PieceType::Pawn(Color::Black)),
-            b_knight: get_piece_coords(&board, &PieceType::Knight(Color::Black)),
-            b_bishop: get_piece_coords(&board, &PieceType::Bishop(Color::Black)),
-            b_rook: get_piece_coords(&board, &PieceType::Rook(Color::Black)),
-            b_queen: get_piece_coords(&board, &PieceType::Queen(Color::Black)),
-            b_king: get_piece_coords(&board, &PieceType::King(Color::Black)),
+            w_pawn: get_piece_coords(&board, PieceType::Pawn, Color::White),
+            w_knight: get_piece_coords(&board, PieceType::Knight, Color::White),
+            w_bishop: get_piece_coords(&board, PieceType::Bishop, Color::White),
+            w_rook: get_piece_coords(&board, PieceType::Rook, Color::White),
+            w_queen: get_piece_coords(&board, PieceType::Queen, Color::White),
+            w_king: get_piece_coords(&board, PieceType::King, Color::White),
+            b_pawn: get_piece_coords(&board, PieceType::Pawn, Color::Black),
+            b_knight: get_piece_coords(&board, PieceType::Knight, Color::Black),
+            b_bishop: get_piece_coords(&board, PieceType::Bishop, Color::Black),
+            b_rook: get_piece_coords(&board, PieceType::Rook, Color::Black),
+            b_queen: get_piece_coords(&board, PieceType::Queen, Color::Black),
+            b_king: get_piece_coords(&board, PieceType::King, Color::Black),
         }
     }
-}
-
-//Check if termal supports more colors.
-fn color_support() -> ColorDepth {
-    if let Some(support) = supports_color::on(Stream::Stdout) {
-        if support.has_16m {
-            println!("16m (rgb) colors are supported");
-        } else if support.has_256 {
-            println!("256 bit colors are supported");
-        } else if support.has_basic {
-            println!("basic ANSI colors are supported");
-        } else {
-            println!("No colors supported");
-        }
-    }
-    ColorDepth::No_Colors
 }
 
 pub fn print_board(board: BoardState) -> Result<()> {
