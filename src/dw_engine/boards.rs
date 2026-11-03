@@ -170,6 +170,16 @@ impl BoardState {
     pub(crate) fn occupancy(&self, occ: Occupier) -> BitBoard {
         self.occupancies[occ as usize]
     }
+
+    pub(crate) fn make_moov(&self, moov: Moov) -> Self {
+        let mut out = self;
+        // Find Color and Piecetype.
+        for bb in out.pieces {
+            //
+        }
+
+        out
+    }
 }
 
 impl Default for BoardState {
