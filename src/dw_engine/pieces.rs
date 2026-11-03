@@ -2,7 +2,7 @@
 // moves and stuff.
 
 use crate::dw_engine::boards::*;
-use crate::dw_engine::magic::{self};
+use crate::dw_engine::magic::{self, Magic, get_slider_moveboard, Slider};
 
 #[derive(Debug, PartialEq, Default, Clone, Copy)]
 pub enum Color {
@@ -15,7 +15,7 @@ pub enum Color {
 pub enum Occupier {
     White = 0,
     Black = 1,
-    Both = 3,
+    Both = 2,
 }
 
 #[derive(Copy, Clone, Debug)]
@@ -153,19 +153,65 @@ impl Rights {
     }
 }
 
-/// Get all of the moves one piece on one square can make.
-fn get_moovs(
+/// Get the moveboard.
+fn get_moveboard(
     state: &BoardState,
     piece: PieceType,
     color: Color,
-    square: Square
-) -> MoovPiece {
-    let mut out = Moov::new();
-    out
+    square: Square,
+    magic: &Magic
+) -> BitBoard {
+    let friends = match color {
+        Color::White => Occupier::White,
+        Color::Black => Occupier::Black,
+    };
+
+    let foes = match color {
+        Color::White => Occupier::Black,
+        Color::Black => Occupier::White,
+    };
+
+    let all = Occupier::Both;
+
+    match piece {
+        // This needs to be more complicated because of all of the 
+        // capture mechanics and en passant.
+        PieceType::Pawn => match color {
+            Color::White => BitBoard::set_val(
+                WP_MOVS[square.index()] & !state.occupancy(all).bits
+            ),
+            Color::Black => BitBoard::set_val(
+                BP_MOVS[square.index()] & !state.occupancy(all).bits
+            ),
+        },
+        PieceType::Knight => BitBoard::set_val(
+            N_MOVS[square.index()] & !state.occupancy(friends).bits
+        ),
+        PieceType::Bishop => BitBoard::new(),
+        PieceType::Rook => {
+            let mut moveboard = get_slider_moveboard(
+                Slider::Rook,
+                square,
+                BitBoard::set_val(
+                    state.occupancy(all).bits & R_MASK[square.index()]
+                ),
+                magic
+            );
+
+            BitBoard::set_val(moveboard.bits & !state.occupancy(friends).bits)
+        },
+        // Just bitwiseAnd rook and bishop moveboards for queen.
+        PieceType::Queen => BitBoard::new(),
+        // Bitwise And with not(same color occupancy) to remove taking
+        // own piece.
+        PieceType::King => BitBoard::set_val(
+            K_MOVS[square.index()] & !state.occupancy(friends).bits
+        ),
+    }
 }
 
 // Calculate legal moves.
-pub(crate) fn legal_moovs(state: &BoardState) -> MoovList {
+pub(crate) fn legal_moovs(state: &BoardState, magic: &Magic) -> MoovList {
     let mut out = MoovList::new();
 
     // Determine what color is to move.
@@ -177,13 +223,17 @@ pub(crate) fn legal_moovs(state: &BoardState) -> MoovList {
     for piece in PieceType::ALL.iter() {
         let squares_piecetype_occupies = state.squares(*piece, color);
 
-        // Make this end when index is over or at max.
         for square in squares_piecetype_occupies {
-            let moovs = get_moovs(
+            if square == Square::none() {
+                break;
+            }
+
+            let moveboard = get_moveboard(
                 state,
                 *piece,
                 color,
-                square
+                square,
+                magic
             );
         }
     }

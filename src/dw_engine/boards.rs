@@ -1,6 +1,6 @@
 use crate::error::{Result, Error};
 
-use super::pieces::{PieceType, Rights, Color};
+use super::pieces::{PieceType, Rights, Color, Occupier};
 
 // TODO: Convert u64 moveboards to BitBoard moveboards.
 
@@ -53,6 +53,10 @@ impl Square {
         }
 
         true
+    }
+
+    pub(crate) fn index(&self) -> usize {
+        self.bits as usize
     }
 
     pub(crate) fn err() -> Self {
@@ -148,6 +152,10 @@ impl BoardState {
         color: Color
     ) -> BitBoard {
         self.pieces[color as usize][piece as usize]
+    }
+
+    pub(crate) fn occupancy(&self, occ: Occupier) -> BitBoard {
+        self.occupancies[occ as usize]
     }
 }
 

@@ -39,11 +39,11 @@ impl Default for GameState {
 pub fn dw_analysis(
     state: GameState,
     depth: usize,
-    magic: Magic,
+    magic: &Magic,
 ) -> Result<(BoardState, f32)> {
     println!("thinking...");
 
-    // Loop over this depth times. ------
+    // Loop over this. ------
     // Make a legal move.
     let pos_eval = evaluate_pos(state
         .board
@@ -52,17 +52,26 @@ pub fn dw_analysis(
         .ok_or(Error::VectorSize)?
     );
 
+    let moovs = pieces::legal_moovs(
+        state.board
+            .last()
+            .expect(
+                "There should always be a boardstate at the end of gamestate"
+            ),
+        &magic
+    );
+
     //------------------------
 
     let eval: f32 = 0.0;
-    let best_move: BoardState = state
+    let best_moov: BoardState = state
         .board
         .last()
         .cloned()
         .ok_or(Error::VectorSize)?;
 
     println!("ran analysis!");
-    Ok((best_move, eval))
+    Ok((best_moov, eval))
 }
 
 // Static evaluation.

@@ -24,7 +24,7 @@ pub const B_MAGICS: [u64; 64] = include!(
 );
 
 #[derive(Copy, Clone)]
-enum Slider {
+pub(crate) enum Slider {
     Bishop,
     Rook,
 }
@@ -87,7 +87,7 @@ impl PieceMagic {
     }
 }
 
-// The main fn called to initialize magic for the engine.
+/// Initialize magic for the engine.
 pub fn initialize_magic() -> Magic {
     let mut out = Magic::new();
     out.fill_moves();
@@ -105,10 +105,10 @@ pub(crate) fn cast_spell(
 }
 
 // Returns moveboard for a slideing piece.
-// This is the main fn that the engine calls to find moves for a piece.
-pub fn get_moveboard(
+// This is the main fn that the engine calls to find moves for a slider.
+pub fn get_slider_moveboard(
     piece: Slider,
-    square: u64,
+    square: Square,
     blockers: BitBoard,
     magic: &Magic,
 ) -> BitBoard {
@@ -121,7 +121,7 @@ pub fn get_moveboard(
         Slider::Rook => magic.rook.magic_numbers,
     };
     let magic_number = magics
-        .get(square as usize)
+        .get(square.index())
         .expect("Index should be a square");
 
     // Get magic index.
@@ -134,7 +134,7 @@ pub fn get_moveboard(
     };
 
     let move_board = move_boards
-        .get(square as usize)
+        .get(square.index())
         .expect("Index of move_boards should be a value from square");
 
     let out = move_board
@@ -583,3 +583,6 @@ pub fn search_magic(magic: Magic) {
     println!("Done!");
 }
 
+pub fn search_fancy_magic() {
+    // Find smaller magics and store them if found.
+}

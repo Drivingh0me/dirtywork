@@ -28,7 +28,7 @@ fn run_app(args: cli::Args) -> Result<()> {
         dw_engine::search_magic(magic);
         println!("end time: {}", Local::now());
     } else {
-        let (best_move, eval) = dw_engine::dw_analysis(game, depth, magic)?;
+        let (best_move, eval) = dw_engine::dw_analysis(game, depth, &magic)?;
         println!("eval: {}", eval);
         ui::print_board(best_move)?;
     }
