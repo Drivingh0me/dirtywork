@@ -170,7 +170,8 @@ fn moves_from_blockers(
         &blockers,
         &moves,
         magic
-    ).unwrap();
+    ).unwrap(); // This unwrap is panickiing.
+    // Err(FailedMutate) magic_boards at index.
 
     out
 }
@@ -204,6 +205,7 @@ fn moves_from_magic(
         match out.get_mut(index) {
             Some(elem) => *elem = moveboard,
             None => return Err(Error::FailedMutate(String::from(
+                // Error here at runtime.
                 "magic_boards at index"))),
         }
     }
