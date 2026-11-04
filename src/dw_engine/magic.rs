@@ -95,12 +95,15 @@ pub fn initialize_magic() -> Magic {
 }
 
 // Returns index of moveboard in moveboards for blockerboard.
+// I think passing blockers is redundant here? May be faster tho.
 pub(crate) fn cast_spell(
     blocker_board: BitBoard,
     magic_number: u64,
-    blockers: u32,
+    blockers: u32, // This is number of ones in PARENT blocker mask.
 ) -> usize {
     let bb = blocker_board.bits;
+    println!("blockerboard has {} blockers", bb.count_ones());
+    println!{"num of blockers is {}", blockers};
     ((bb.wrapping_mul(magic_number)) >> (64 - blockers)) as usize
 }
 
@@ -170,8 +173,7 @@ fn moves_from_blockers(
         &blockers,
         &moves,
         magic
-    ).unwrap(); // This unwrap is panickiing.
-    // Err(FailedMutate) magic_boards at index.
+    ).unwrap();
 
     out
 }
@@ -183,7 +185,9 @@ fn moves_from_magic(
     moves: &Vec<BitBoard>,
     magic: u64
 ) -> Result<Vec<BitBoard>> {
-    let mut out = Vec::new();
+    // Need to initialize with size.
+    let size = moves.len();
+    let mut out = vec![BitBoard::new(); size];
 
     for i in 0..blockers.len() {
         let num_of_blockers: u32 = blockers
@@ -205,7 +209,6 @@ fn moves_from_magic(
         match out.get_mut(index) {
             Some(elem) => *elem = moveboard,
             None => return Err(Error::FailedMutate(String::from(
-                // Error here at runtime.
                 "magic_boards at index"))),
         }
     }
