@@ -11,6 +11,7 @@ use crate::dw_engine::boards::{Square};
 
 use crate::error::{Result, Error};
 
+// This  might not be necessary. Try only using BoardState.
 pub struct GameState {
     haswon: Option<Color>,
     incheck: bool,

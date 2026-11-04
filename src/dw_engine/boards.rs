@@ -1,6 +1,6 @@
 use crate::error::{Result, Error};
 
-use super::pieces::{PieceType, Rights, Color, Occupier};
+use super::pieces::{PieceType, Rights, Color, Occupier, Moov};
 
 // TODO: Convert u64 moveboards to BitBoard moveboards.
 
@@ -171,9 +171,11 @@ impl BoardState {
         self.occupancies[occ as usize]
     }
 
+    /// Creates new BoardState with moov.
     pub(crate) fn make_moov(&self, moov: Moov) -> Self {
-        let mut out = self;
-        // Find Color and Piecetype.
+        let mut out = *self;
+        // Get color from BoardState so loop is half as long.
+        // Find Piecetype.
         for bb in out.pieces {
             //
         }
