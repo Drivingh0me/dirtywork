@@ -11,6 +11,15 @@ pub enum Color {
     Black = 1,
 }
 
+impl Color {
+    pub fn other(&self) -> Self {
+        match self {
+            Color::White => Color::Black,
+            Color::Black => Color::White,
+        }
+    }
+}
+
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Occupier {
     White = 0,

@@ -44,24 +44,16 @@ pub fn dw_analysis(
 ) -> Result<(BoardState, f32)> {
     println!("thinking...");
 
-    // Loop over this. ------
-    // Make a legal move.
-    let pos_eval = evaluate_pos(state
+    let board_state = state
         .board
         .last()
-        // .cloned()
-        .ok_or(Error::VectorSize)?,
-        &magic
-    );
+        .expect("There should always be a last boardstate in gamestate");
 
-    let moovs = pieces::legal_moovs(
-        state.board
-            .last()
-            .expect(
-                "There should always be a boardstate at the end of gamestate"
-            ),
-        &magic
-    );
+    // Loop over this. ------
+    // Make a legal move.
+    let pos_eval = evaluate_pos(board_state, &magic);
+
+    let fundamental_moovs = pieces::legal_moovs(board_state, &magic);
 
     let moov = moovs.get(1);
 

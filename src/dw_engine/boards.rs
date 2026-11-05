@@ -64,6 +64,10 @@ impl Square {
         self.bits as usize
     }
 
+    pub(crate) fn val(&self) -> u64 {
+        self.bits as u64
+    }
+
     pub(crate) fn err() -> Self {
         Self { bits: 64 }
     }
@@ -167,6 +171,10 @@ impl Rights {
             Color::Black => self.bits &= !WHITE_TO_MOVE,
         }
     }
+
+    pub(crate) fn next_turn(&mut self) {
+        self.bits ^ WHITE_TO_MOVE;
+    }
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
@@ -187,6 +195,7 @@ impl BoardState {
         }
     }
 
+    /// Get all of the squares a pice of certain type and color is on.
     pub(crate) fn squares(&self,
         piece: PieceType,
         color: Color
@@ -229,10 +238,32 @@ impl BoardState {
     pub(crate) fn make_moov(&self, moov: Moov) -> Self {
         let mut out = *self;
         // Get color from BoardState so loop is half as long.
-        // Find Piecetype.
-        for bb in out.pieces {
-            //
+        let color = self.rights.turn();
+
+        let from_square = moov.start();
+        let to_square = moov.end();
+
+        // Find Piece.
+        // Stop once piecetype is found.
+        for bb in out.pieces[color] {
+            if bb & (1u64 << from_square.val()) != 0 {
+                // Remove moved piece.
+                bb ^= (1u64 << from_square.val());
+
+                // Add new moved piece.
+                bb ^= (1u64 << to_square.val());
+
+                break;
+            }
         }
+
+        // Remove captured piece if present.
+        for bb in out.pieces[color.other()] {
+            //
+            bb &= !(1u64 << to_square.val());
+        }
+
+        out.rights.next_turn();
 
         out
     }
