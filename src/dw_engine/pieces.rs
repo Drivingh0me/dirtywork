@@ -61,6 +61,14 @@ impl MoovList {
         self.moovs[self.len as usize] = moov;
         self.len += 1;
     }
+
+    pub(crate) fn get(&self, index: usize) -> Moov {
+        // TODO: Make this return something if index is beyond len.
+        if index > 255 {
+            panic!("cannot index MoovList beyond 255");
+        }
+        self.moovs[index]
+    }
 }
 
 #[derive(Copy, Clone, Debug)]
@@ -86,8 +94,53 @@ impl Moov {
     pub(crate) fn new() -> Self {
         Self { bits: 0 }
     }
+
     pub(crate) fn none() -> Self {
         Self { bits: 0 }
+    }
+
+    pub(crate) fn start(&self) -> Square {
+        let val = (self.bits & 0b0011_1111) as u8;
+
+        Square::set(val)
+    }
+
+    pub(crate) fn end(&self) -> Square {
+        let val = ((self.bits >> 6) & 0b0011_1111) as u8;
+
+        Square::set(val)
+    }
+
+    pub(crate) fn set_start(&mut self, square: Square) {
+        if !square.check() {
+            panic!("tried to set start of moov with square err");
+        }
+
+        self.bits |= square.index() as u16;
+    }
+
+    pub(crate) fn set_end(&mut self, square: Square) {
+        if !square.check() {
+            panic!("tried to set end of moov with square err");
+        }
+
+        // Instead of raw six, make a CONST that is 6.
+        self.bits |= (square.index() as u16) << 6;
+    }
+
+    pub(crate) fn string(&self) -> String {
+        let mut out = String::new();
+
+        let start_square = self.start();
+        let end_square = self.end();
+
+        let start = LongNotation::from_square(start_square);
+        let end = LongNotation::from_square(end_square);
+
+        out.push_str(&start.string);
+        out.push_str(&end.string);
+
+        out
     }
 }
 
@@ -227,6 +280,11 @@ pub(crate) fn legal_moovs(state: &BoardState, magic: &Magic) -> MoovList {
         let squares_piecetype_occupies = state.squares(*piece, color);
 
         for square in squares_piecetype_occupies {
+            // If not a square, end of array.
+            if !square.check() {
+                break;
+            }
+
             let from_square = square.bits();
 
             if square == Square::none() {

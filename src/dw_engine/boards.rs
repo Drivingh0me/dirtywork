@@ -237,6 +237,42 @@ pub(crate) struct LongNotation {
     pub string: String,
 }
 
+impl LongNotation {
+    pub(crate) fn new() -> Self {
+        Self { string: String::new() }
+    }
+
+    pub(crate) fn from_square(square: Square) -> Self {
+        let location = location(square);
+
+        let rank = match location.y {
+            0 => '1',
+            1 => '2',
+            2 => '3',
+            3 => '4',
+            4 => '5',
+            5 => '6',
+            6 => '7',
+            7 => '8',
+            _ => 'Y',
+        };
+
+        let file = match location.x {
+            0 => 'a',
+            1 => 'b',
+            2 => 'c',
+            3 => 'd',
+            4 => 'e',
+            5 => 'f',
+            6 => 'g',
+            7 => 'h',
+            _ => 'X',
+        };
+
+        Self { string: format!("{}{}", file, rank) }
+    }
+}
+
 impl Location {
     pub(crate) fn square(self) -> Square {
         let out = Square::set((self.x + self.y * 8) as u8);

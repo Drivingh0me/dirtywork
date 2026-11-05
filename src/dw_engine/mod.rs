@@ -62,6 +62,10 @@ pub fn dw_analysis(
         &magic
     );
 
+    let moov = moovs.get(1);
+
+    println!("{}", moov.string());
+
     //------------------------
 
     let eval: f32 = 0.0;
