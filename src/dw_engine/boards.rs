@@ -1,6 +1,6 @@
 use crate::error::{Result, Error};
 
-use super::pieces::{PieceType, Rights, Color, Occupier, Moov};
+use super::pieces::{PieceType, Color, Occupier, Moov};
 
 // TODO: Convert u64 moveboards to BitBoard moveboards.
 
@@ -115,6 +115,60 @@ pub const B_MASK: [u64; 64] = include!(
     "../../bitboard_generator/bitboards/b.txt"
 );
 
+pub(crate) const WHITE_TO_MOVE: u8 = 0b1000_0000; // White's turn to move.
+pub(crate) const BLACK_TO_MOVE: u8 = 0b0000_0000; // Black's turn to move.
+pub(crate) const WHITE_OO: u8 = 0b0000_0001; // White can short castle
+pub(crate) const WHITE_OOO: u8 = 0b0000_0010; // White can long castle
+pub(crate) const BLACK_OO: u8 = 0b0000_0100; // Black can short castle
+pub(crate) const BLACK_OOO: u8 = 0b0000_1000; // Black can long castle
+pub(crate) const NO_CASTLE: u8 = 0b0000_0000;
+pub(crate) const ANY_CASTLE: u8 = 0b0000_1111;
+pub(crate) const DEFAULT_RIGHTS: u8 = 0b1000_1111;
+
+// Stores if the rooks or kings have moved to stop casttle rights
+// and other boardstate stuff.
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub(crate) struct Rights {
+    bits: u8,
+}
+
+impl Rights {
+    pub(crate) fn new() -> Self {
+        Self {
+            bits: DEFAULT_RIGHTS,
+        }
+    }
+
+    /// Grant a specific castling right.
+    pub(crate) fn grant(&mut self, right: u8) {
+        self.bits |= right;
+    }
+
+    /// Revoke a specific castling right.
+    pub(crate) fn revoke(&mut self, right: u8) {
+        self.bits &= !right;
+    }
+
+    /// Check if a specific castling right is available.
+    pub(crate) fn has(&mut self, right: u8) -> bool {
+        (self.bits & right) == right
+    }
+
+    pub(crate) fn turn(&self) -> Color {
+        match self.bits & WHITE_TO_MOVE {
+            WHITE_TO_MOVE => Color::White,
+            _ => Color::Black,
+        }
+    }
+
+    pub(crate) fn set_turn(&mut self, color: Color) {
+        match color {
+            Color::White => self.bits |= WHITE_TO_MOVE,
+            Color::Black => self.bits &= !WHITE_TO_MOVE,
+        }
+    }
+}
+
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub struct BoardState {
     pieces: [[BitBoard; 6]; 2],
@@ -181,6 +235,14 @@ impl BoardState {
         }
 
         out
+    }
+
+    pub(crate) fn turn(&self) -> Color {
+        self.rights.turn()
+    }
+
+    pub(crate) fn set_turn(&mut self, color: Color) {
+        self.rights.set_turn(color);
     }
 }
 

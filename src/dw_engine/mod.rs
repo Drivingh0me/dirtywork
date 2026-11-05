@@ -50,7 +50,8 @@ pub fn dw_analysis(
         .board
         .last()
         // .cloned()
-        .ok_or(Error::VectorSize)?
+        .ok_or(Error::VectorSize)?,
+        &magic
     );
 
     let moovs = pieces::legal_moovs(
@@ -80,7 +81,7 @@ pub fn dw_analysis(
 }
 
 // Static evaluation.
-fn evaluate_pos(state: &BoardState) -> f32 {
+fn evaluate_pos(state: &BoardState, magic: &Magic) -> f32 {
     let material_weight: f32 = 0.5;
     let control_weight: f32 = 0.3;
     let agro_weight: f32 = 0.2;
@@ -88,7 +89,7 @@ fn evaluate_pos(state: &BoardState) -> f32 {
     let material = count_material(&state);
     println!("material is: {}", material);
 
-    let control = measure_control(&state);
+    let control = measure_control(&state, &magic);
     println!("control is: {}", control);
 
     let agro = aggression(&state);
@@ -126,10 +127,29 @@ fn count_material(state: &BoardState) -> f32 {
     1.0 * p + 3.0 * n + 3.0 * b + 5.0 * r + 9.0 * q
 }
 
-fn measure_control(state: &BoardState) -> f32 {
+fn measure_control(state: &BoardState, magic: &Magic) -> f32 {
     // Form a movemap for all 64 positions and xor the current map.
+    let mut exp_state = *state;
 
-    0.0
+    exp_state.set_turn(Color::White);
+
+    let white_moovs = pieces::legal_moovs(
+        &exp_state,
+        &magic
+    );
+
+    let white_control = white_moovs.len() as f32;
+
+    exp_state.set_turn(Color::White);
+
+    let black_moovs = pieces::legal_moovs(
+        &exp_state,
+        &magic
+    );
+
+    let black_control = black_moovs.len() as f32;
+
+    white_control / black_control
 }
 
 pub fn get_piece_coords(
