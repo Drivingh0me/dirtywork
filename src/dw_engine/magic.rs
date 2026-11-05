@@ -95,15 +95,13 @@ pub fn initialize_magic() -> Magic {
 }
 
 // Returns index of moveboard in moveboards for blockerboard.
-// I think passing blockers is redundant here? May be faster tho.
 pub(crate) fn cast_spell(
     blocker_board: BitBoard,
     magic_number: u64,
-    blockers: u32, // This is number of ones in PARENT blocker mask.
+    blockers: u32, // This is number of ones in PARENT blocker mask,
+    // not the blockerboard.
 ) -> usize {
     let bb = blocker_board.bits;
-    println!("blockerboard has {} blockers", bb.count_ones());
-    println!{"num of blockers is {}", blockers};
     ((bb.wrapping_mul(magic_number)) >> (64 - blockers)) as usize
 }
 
@@ -113,11 +111,9 @@ pub fn get_slider_moveboard(
     piece: Slider,
     square: Square,
     blockers: BitBoard,
+    num_of_blockers: u32, // Number of ones in blocker mask.
     magic: &Magic,
 ) -> BitBoard {
-    // Determine number of blockers.
-    let num_of_blockers = blockers.bits.count_ones();
-
     // Get magic number.
     let magics = match piece {
         Slider::Bishop => magic.bishop.magic_numbers,
@@ -157,6 +153,17 @@ fn moves_from_blockers(
 ) -> Vec<BitBoard> {
     let mut moves = Vec::new();
 
+    let blocker_mask_ones = match piece {
+        Slider::Rook => boards::R_MASK
+            .get(square)
+            .expect("R_MASK is size of squares")
+            .count_ones(),
+        Slider::Bishop => boards::B_MASK
+            .get(square)
+            .expect("B_MASK is at least size of squares")
+            .count_ones(),
+    };
+
     // Adds all of the moveboards to "moves" that were generated from the
     // blockerboards.
     for blocker_set in blockers {
@@ -172,6 +179,7 @@ fn moves_from_blockers(
     let out = moves_from_magic(
         &blockers,
         &moves,
+        blocker_mask_ones,
         magic
     ).unwrap();
 
@@ -183,6 +191,7 @@ fn moves_from_blockers(
 fn moves_from_magic(
     blockers: &Vec<BitBoard>,
     moves: &Vec<BitBoard>,
+    blocker_mask_ones: u32,
     magic: u64
 ) -> Result<Vec<BitBoard>> {
     // Need to initialize with size.
@@ -190,11 +199,11 @@ fn moves_from_magic(
     let mut out = vec![BitBoard::new(); size];
 
     for i in 0..blockers.len() {
-        let num_of_blockers: u32 = blockers
-            .get(i)
-            .expect("Blockers should be at least len of blockers")
-            .bits
-            .count_ones();
+        // let num_of_blockers: u32 = blockers
+        //     .get(i)
+        //     .expect("Blockers should be at least len of blockers")
+        //     .bits
+        //     .count_ones();
 
         let blocker_bb = *blockers
             .get(i)
@@ -204,7 +213,7 @@ fn moves_from_magic(
             .get(i)
             .ok_or(Error::ItemNotFound(String::from(
                 "moveboard in moveboards")))?;
-        let index = cast_spell(blocker_bb, magic, num_of_blockers);
+        let index = cast_spell(blocker_bb, magic, blocker_mask_ones);
 
         match out.get_mut(index) {
             Some(elem) => *elem = moveboard,

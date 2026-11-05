@@ -91,28 +91,28 @@ impl Moov {
     }
 }
 
-struct MoovPiece {
-    moovs: [Moov; 27],
-    len: u8,
-}
-
-impl MoovPiece {
-    fn new() -> Self {
-        Self {
-            moovs: [Moov::new(); 27],
-            len: 0,
-        }
-    }
-
-    fn push(&mut self, moov: Moov) {
-        if self.len > 26 {
-            // Make this not silent.
-            return ();
-        }
-        self.moovs[self.len as usize] = moov;
-        self.len += 1;
-    }
-}
+// struct MoovPiece {
+//     moovs: [Moov; 27],
+//     len: u8,
+// }
+//
+// impl MoovPiece {
+//     fn new() -> Self {
+//         Self {
+//             moovs: [Moov::new(); 27],
+//             len: 0,
+//         }
+//     }
+//
+//     fn push(&mut self, moov: Moov) {
+//         if self.len > 26 {
+//             // Make this not silent.
+//             return ();
+//         }
+//         self.moovs[self.len as usize] = moov;
+//         self.len += 1;
+//     }
+// }
 
 pub(crate) const WHITE_TO_MOVE: u8 = 0b1000_0000; // White's turn to move.
 pub(crate) const BLACK_TO_MOVE: u8 = 0b0000_0000; // Black's turn to move.
@@ -174,7 +174,7 @@ fn get_moveboard(
     let all = Occupier::Both;
 
     match piece {
-        // This needs to be more complicated because of all of the 
+        // This needs to be more complicated because of all of the pawn
         // capture mechanics and en passant.
         PieceType::Pawn => match color {
             Color::White => BitBoard::set_val(
@@ -195,6 +195,9 @@ fn get_moveboard(
                 BitBoard::set_val(
                     state.occupancy(all).bits & R_MASK[square.index()]
                 ),
+                R_MASK.get(square.index())
+                    .expect("R_MASK to be size of index")
+                    .count_ones(),
                 magic
             );
 
@@ -250,7 +253,7 @@ pub(crate) fn legal_moovs(state: &BoardState, magic: &Magic) -> MoovList {
                 let to_square = bb.trailing_zeros() as u16;
 
                 // Set to square for moov.
-                // Instead of raw six, make a CONT that is 6.
+                // Instead of raw six, make a CONST that is 6.
                 moov.bits |= (to_square << 6);
 
                 // Clear the lowest set bit.
