@@ -222,7 +222,38 @@ fn get_moveboard(
             BitBoard::set_val(moveboard.bits & !state.occupancy(friends).bits)
         },
         // Just bitwiseAnd rook and bishop moveboards for queen.
-        PieceType::Queen => BitBoard::new(),
+        PieceType::Queen => {
+            let mut moveboard = get_slider_moveboard(
+                Slider::Bishop,
+                square,
+                BitBoard::set_val(
+                    state.occupancy(all).bits & B_MASK[square.index()]
+                ),
+                B_MASK.get(square.index())
+                    .expect("B_MASK to be size of index")
+                    .count_ones(),
+                magic
+            );
+
+            moveboard.bits &= !state.occupancy(friends).bits;
+
+            let mut moveboard_rook = get_slider_moveboard(
+                Slider::Rook,
+                square,
+                BitBoard::set_val(
+                    state.occupancy(all).bits & R_MASK[square.index()]
+                ),
+                R_MASK.get(square.index())
+                    .expect("R_MASK to be size of index")
+                    .count_ones(),
+                magic
+            );
+
+            moveboard_rook.bits &= !state.occupancy(friends).bits;
+
+            BitBoard::set_val(moveboard.bits | moveboard_rook.bits)
+
+        },
         // Bitwise And with not(same color occupancy) to remove taking
         // own piece.
         PieceType::King => BitBoard::set_val(

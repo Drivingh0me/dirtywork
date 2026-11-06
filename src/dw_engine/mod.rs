@@ -40,6 +40,17 @@ impl Default for GameState {
     }
 }
 
+struct Eval {
+    eval: i16, // Evaluation in centipawns.
+    mate: i8, // How many moves till forced mate, zero is no mate.
+}
+
+impl Eval {
+    fn new() -> Self {
+        Self { eval: 0, mate: 0 }
+    }
+}
+
 // Need to make this continuously return according to UCI standard, and can
 // stop. Make it return depth, score, etc  that can be parsed to
 // form a UCI standard stdout through UI.
@@ -64,6 +75,10 @@ pub fn dw_analysis(
     let mut top_moov = Moov::new();
     let mut max = -100.0;
 
+    for i in 0..depth {
+        //
+    }
+
     println!("fundamentals are:");
     for i in 0..fundamental_moovs.len() {
         let moov = fundamental_moovs.get(i as usize);
@@ -84,14 +99,18 @@ pub fn dw_analysis(
 
     let best_moov = board_state.from_moov(top_moov);
 
-    // let best_moov: BoardState = state
-    //     .board
-    //     .last()
-    //     .cloned()
-    //     .ok_or(Error::VectorSize)?;
-
     println!("ran analysis!");
     Ok((best_moov, max))
+}
+
+fn rank_moovs(
+    board: &BoardState,
+    moovs: &mut MoovList,
+    magic: &Magic
+) {
+    for i in 0..moovs.len() {
+        let moov = moovs.get(i as usize);
+    }
 }
 
 // Static evaluation.
