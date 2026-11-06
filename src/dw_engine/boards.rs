@@ -173,7 +173,7 @@ impl Rights {
     }
 
     pub(crate) fn next_turn(&mut self) {
-        self.bits ^ WHITE_TO_MOVE;
+        self.bits ^= WHITE_TO_MOVE;
     }
 }
 
@@ -239,23 +239,31 @@ impl BoardState {
         let mut out = *self;
 
         // Get color from BoardState.
-        let color = self.turn();
-
-        // TODO: Update the occupancies with moov.
-        // Moov piece in friendly occupancy.
-
-        // Remove captured piece in foe ocupancy.
-
-        // Update both occupancy.
+        let color = out.turn();
 
         let from_square = moov.start();
         let to_square = moov.end();
 
+        // Moov piece in friendly occupancy.
+        // TODO: Maybe make this safer without xor?
+        out.occupancies[color as usize].bits ^= 1u64 << from_square.val();
+        out.occupancies[color as usize].bits ^= 1u64 << to_square.val();
+
+        // Remove captured piece in foe ocupancy.
+        out.occupancies[color.other() as usize]
+            .bits &= !(1u64 << to_square.val());
+
+        // Update both occupancy.
+        out.occupancies[Occupier::Both as usize].bits =
+            out.occupancies[Occupier::White as usize].bits
+            | out.occupancies[Occupier::Black as usize].bits;
+
         // Find Piece.
         // Stop once piecetype is found.
-        for mut bb in out.pieces[color as usize] {
+        for bb in out.pieces[color as usize].iter_mut() {
             if bb.bits & (1u64 << from_square.val()) != 0 {
                 // Remove moved piece.
+                // TODO: Maybe consider not using xor?
                 bb.bits ^= 1u64 << from_square.val();
 
                 // Add new moved piece.
@@ -266,7 +274,7 @@ impl BoardState {
         }
 
         // Remove captured piece if present.
-        for mut bb in out.pieces[color.other() as usize] {
+        for bb in out.pieces[color.other() as usize].iter_mut() {
             //
             bb.bits &= !(1u64 << to_square.val());
         }

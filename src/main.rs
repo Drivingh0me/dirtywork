@@ -17,7 +17,7 @@ fn main() -> Result<()> {
 }
 
 fn run_app(args: cli::Args) -> Result<()> {
-    let game = dw_engine::GameState::default();
+    let mut game = dw_engine::GameState::default();
     let magic = dw_engine::initialize_magic();
 
     // This should be changable by the UCI.
@@ -28,9 +28,19 @@ fn run_app(args: cli::Args) -> Result<()> {
         dw_engine::search_magic(magic);
         println!("end time: {}", Local::now());
     } else {
-        let (best_move, eval) = dw_engine::dw_analysis(game, depth, &magic)?;
+        let (mut best_move, mut eval) = dw_engine
+            ::dw_analysis(&game, depth, &magic)?;
         println!("eval: {}", eval);
         ui::print_board(best_move)?;
+
+        // Debug code. -----
+        for i in 0..5 {
+            game.push(best_move);
+            (best_move, eval) = dw_engine::dw_analysis(&game, depth, &magic)?;
+            println!("eval: {}", eval);
+            ui::print_board(best_move)?;
+        }
+        //------------------
     }
 
     Ok(())

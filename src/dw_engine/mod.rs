@@ -18,6 +18,12 @@ pub struct GameState {
     board: Vec<BoardState>,
 }
 
+impl GameState {
+    pub(crate) fn push(&mut self, board: BoardState) {
+        self.board.push(board);
+    }
+}
+
 impl Default for GameState {
     fn default() -> Self {
         let mut board = Vec::<BoardState>::new();
@@ -38,7 +44,7 @@ impl Default for GameState {
 // stop. Make it return depth, score, etc  that can be parsed to
 // form a UCI standard stdout through UI.
 pub fn dw_analysis(
-    state: GameState,
+    state: &GameState,
     depth: usize,
     magic: &Magic,
 ) -> Result<(BoardState, f32)> {
@@ -51,9 +57,9 @@ pub fn dw_analysis(
 
     // Loop over this. ------
     // Make a legal move.
-    let pos_eval = evaluate_pos(&board_state, &magic);
+    // let pos_eval = evaluate_pos(&board_state, &magic);
 
-    let fundamental_moovs = pieces::legal_moovs(board_state, &magic);
+    let fundamental_moovs = pieces::legal_moovs(&board_state, &magic);
 
     let mut top_moov = Moov::new();
     let mut max = -100.0;
@@ -76,15 +82,16 @@ pub fn dw_analysis(
 
     //------------------------
 
-    let eval: f32 = 0.0;
-    let best_moov: BoardState = state
-        .board
-        .last()
-        .cloned()
-        .ok_or(Error::VectorSize)?;
+    let best_moov = board_state.from_moov(top_moov);
+
+    // let best_moov: BoardState = state
+    //     .board
+    //     .last()
+    //     .cloned()
+    //     .ok_or(Error::VectorSize)?;
 
     println!("ran analysis!");
-    Ok((best_moov, eval))
+    Ok((best_moov, max))
 }
 
 // Static evaluation.

@@ -191,7 +191,21 @@ fn get_moveboard(
         PieceType::Knight => BitBoard::set_val(
             N_MOVS[square.index()] & !state.occupancy(friends).bits
         ),
-        PieceType::Bishop => BitBoard::new(),
+        PieceType::Bishop => {
+            let mut moveboard = get_slider_moveboard(
+                Slider::Bishop,
+                square,
+                BitBoard::set_val(
+                    state.occupancy(all).bits & B_MASK[square.index()]
+                ),
+                B_MASK.get(square.index())
+                    .expect("B_MASK to be size of index")
+                    .count_ones(),
+                magic
+            );
+
+            BitBoard::set_val(moveboard.bits & !state.occupancy(friends).bits)
+        },
         PieceType::Rook => {
             let mut moveboard = get_slider_moveboard(
                 Slider::Rook,
