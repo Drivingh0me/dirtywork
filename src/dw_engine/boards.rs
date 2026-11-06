@@ -241,6 +241,13 @@ impl BoardState {
         // Get color from BoardState.
         let color = self.turn();
 
+        // TODO: Update the occupancies with moov.
+        // Moov piece in friendly occupancy.
+
+        // Remove captured piece in foe ocupancy.
+
+        // Update both occupancy.
+
         let from_square = moov.start();
         let to_square = moov.end();
 
@@ -278,6 +285,38 @@ impl BoardState {
     }
 }
 
+// Starting positions.
+const WHITE_P_SP: u64 = 65280;
+const WHITE_N_SP: u64 = 66;
+const WHITE_B_SP: u64 = 36;
+const WHITE_R_SP: u64 = 129;
+const WHITE_Q_SP: u64 = 16;
+const WHITE_K_SP: u64 = 8;
+const BLACK_P_SP: u64 = 71776119061217280;
+const BLACK_N_SP: u64 = 4755801206503243776;
+const BLACK_B_SP: u64 = 2594073385365405696;
+const BLACK_R_SP: u64 = 9295429630892703744;
+const BLACK_Q_SP: u64 = 1152921504606846976;
+const BLACK_K_SP: u64 = 576460752303423488;
+
+const WHITE_OCC: u64 =
+      WHITE_P_SP
+    | WHITE_N_SP
+    | WHITE_B_SP
+    | WHITE_R_SP
+    | WHITE_Q_SP
+    | WHITE_K_SP;
+
+const BLACK_OCC: u64 = 
+      BLACK_P_SP
+    | BLACK_N_SP
+    | BLACK_B_SP
+    | BLACK_R_SP
+    | BLACK_Q_SP
+    | BLACK_K_SP;
+
+const BOTH_OCC: u64 = WHITE_OCC | BLACK_OCC;
+
 impl Default for BoardState {
     /// Sets starting position for all pieces.
     fn default() -> Self {
@@ -299,7 +338,11 @@ impl Default for BoardState {
             ]],
             crumb: Square::none(),
             rights: Rights::new(),
-            occupancies: [BitBoard::new(); 3],
+            occupancies: [
+                BitBoard::set_val(WHITE_OCC),
+                BitBoard::set_val(BLACK_OCC),
+                BitBoard::set_val(BOTH_OCC),
+            ],
 
             // tomove: Color::White,
             // w_pawn: BitBoard { bits: 65280 },

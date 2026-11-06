@@ -157,53 +157,6 @@ impl Moov {
     }
 }
 
-// pub(crate) const WHITE_TO_MOVE: u8 = 0b1000_0000; // White's turn to move.
-// pub(crate) const BLACK_TO_MOVE: u8 = 0b0000_0000; // Black's turn to move.
-// pub(crate) const WHITE_OO: u8 = 0b0000_0001; // White can short castle
-// pub(crate) const WHITE_OOO: u8 = 0b0000_0010; // White can long castle
-// pub(crate) const BLACK_OO: u8 = 0b0000_0100; // Black can short castle
-// pub(crate) const BLACK_OOO: u8 = 0b0000_1000; // Black can long castle
-// pub(crate) const NO_CASTLE: u8 = 0b0000_0000;
-// pub(crate) const ANY_CASTLE: u8 = 0b0000_1111;
-// pub(crate) const DEFAULT_RIGHTS: u8 = 0b1000_1111;
-
-// // Stores if the rooks or kings have moved to stop casttle rights
-// // and other boardstate stuff.
-// #[derive(Debug, PartialEq, Clone, Copy)]
-// pub(crate) struct Rights {
-//     bits: u8,
-// }
-//
-// impl Rights {
-//     pub(crate) fn new() -> Self {
-//         Self {
-//             bits: DEFAULT_RIGHTS,
-//         }
-//     }
-//
-//     /// Grant a specific castling right.
-//     pub(crate) fn grant(&mut self, right: u8) {
-//         self.bits |= right;
-//     }
-//
-//     /// Revoke a specific castling right.
-//     pub(crate) fn revoke(&mut self, right: u8) {
-//         self.bits &= !right;
-//     }
-//
-//     /// Check if a specific castling right is available.
-//     pub(crate) fn has(&mut self, right: u8) -> bool {
-//         (self.bits & right) == right
-//     }
-//
-//     pub(crate) fn turn(&self) -> Color {
-//         match self.bits & WHITE_TO_MOVE {
-//             WHITE_TO_MOVE => Color::White,
-//             _ => Color::Black,
-//         }
-//     }
-// }
-
 /// Get the moveboard.
 fn get_moveboard(
     state: &BoardState,
@@ -271,9 +224,6 @@ pub(crate) fn legal_moovs(state: &BoardState, magic: &Magic) -> MoovList {
     // Determine what color is to move.
     let color = state.turn();
 
-    // Get all moves for the jumping pieces.
-
-    // Get all moves for the sliding pieces.
     for piece in PieceType::ALL.iter() {
         let squares_piecetype_occupies = state.squares(*piece, color);
 
