@@ -51,13 +51,28 @@ pub fn dw_analysis(
 
     // Loop over this. ------
     // Make a legal move.
-    let pos_eval = evaluate_pos(board_state, &magic);
+    let pos_eval = evaluate_pos(&board_state, &magic);
 
     let fundamental_moovs = pieces::legal_moovs(board_state, &magic);
 
-    let moov = moovs.get(1);
+    let mut top_moov = Moov::new();
+    let mut max = -100.0;
 
-    println!("{}", moov.string());
+    println!("fundamentals are:");
+    for i in 0..fundamental_moovs.len() {
+        let moov = fundamental_moovs.get(i as usize);
+        println!("{}", moov.string());
+        let board = board_state.from_moov(moov);
+        let eval = evaluate_pos(&board, &magic);
+
+        if eval > max {
+            top_moov = moov;
+            max = eval;
+        }
+    }
+
+
+    println!("top move is: {}", top_moov.string());
 
     //------------------------
 
@@ -79,13 +94,13 @@ fn evaluate_pos(state: &BoardState, magic: &Magic) -> f32 {
     let agro_weight: f32 = 0.2;
 
     let material = count_material(&state);
-    println!("material is: {}", material);
+    // println!("material is: {}", material);
 
     let control = measure_control(&state, &magic);
-    println!("control is: {}", control);
+    // println!("control is: {}", control);
 
     let agro = aggression(&state);
-    println!("aggression is: {}", agro);
+    // println!("aggression is: {}", agro);
 
     (material_weight * material +
     control_weight * control +

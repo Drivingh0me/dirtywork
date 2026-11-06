@@ -283,7 +283,7 @@ pub(crate) fn legal_moovs(state: &BoardState, magic: &Magic) -> MoovList {
                 break;
             }
 
-            let from_square = square.bits();
+            // let from_square = square.bits();
 
             if square == Square::none() {
                 break;
@@ -303,14 +303,13 @@ pub(crate) fn legal_moovs(state: &BoardState, magic: &Magic) -> MoovList {
                 let mut moov = Moov::new();
 
                 // Set start square for moov.
-                moov.bits |= from_square;
+                moov.set_start(square);
 
                 // Get the index of the lowest set bit (0-63).
-                let to_square = bb.trailing_zeros() as u16;
+                let to_square = bb.trailing_zeros() as u8;
 
                 // Set to square for moov.
-                // Instead of raw six, make a CONST that is 6.
-                moov.bits |= (to_square << 6);
+                moov.set_end(Square::set(to_square));
 
                 // Clear the lowest set bit.
                 bb &= bb - 1;

@@ -235,32 +235,33 @@ impl BoardState {
     }
 
     /// Creates new BoardState with moov.
-    pub(crate) fn make_moov(&self, moov: Moov) -> Self {
+    pub(crate) fn from_moov(&self, moov: Moov) -> Self {
         let mut out = *self;
-        // Get color from BoardState so loop is half as long.
-        let color = self.rights.turn();
+
+        // Get color from BoardState.
+        let color = self.turn();
 
         let from_square = moov.start();
         let to_square = moov.end();
 
         // Find Piece.
         // Stop once piecetype is found.
-        for bb in out.pieces[color] {
-            if bb & (1u64 << from_square.val()) != 0 {
+        for mut bb in out.pieces[color as usize] {
+            if bb.bits & (1u64 << from_square.val()) != 0 {
                 // Remove moved piece.
-                bb ^= (1u64 << from_square.val());
+                bb.bits ^= 1u64 << from_square.val();
 
                 // Add new moved piece.
-                bb ^= (1u64 << to_square.val());
+                bb.bits ^= 1u64 << to_square.val();
 
                 break;
             }
         }
 
         // Remove captured piece if present.
-        for bb in out.pieces[color.other()] {
+        for mut bb in out.pieces[color.other() as usize] {
             //
-            bb &= !(1u64 << to_square.val());
+            bb.bits &= !(1u64 << to_square.val());
         }
 
         out.rights.next_turn();
