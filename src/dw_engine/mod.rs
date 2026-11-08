@@ -51,6 +51,13 @@ impl Eval {
     }
 }
 
+// Need to be able to store data about braches for tree.
+struct Branch {
+    depth: u8,
+    max: u16,
+    min: u16,
+}
+
 // Need to make this continuously return according to UCI standard, and can
 // stop. Make it return depth, score, etc  that can be parsed to
 // form a UCI standard stdout through UI.
@@ -74,6 +81,16 @@ pub fn dw_analysis(
 
     let mut top_moov = Moov::new();
     let mut max = -100.0;
+
+    // Use this to keep memory of branches and how search proceeds.
+    // Maybe trim to top 64 most likely instead of full MoovList.
+    // let mut tree = Vec::Branch::new();
+
+    for i in fundamental_moovs.len() {
+        // Need to use this as a state, and recursively call tree
+        // traversal to deepen select branches.
+        tree.push(Vec::<Branch>::new());
+    }
 
     for i in 0..depth {
         //
@@ -103,14 +120,46 @@ pub fn dw_analysis(
     Ok((best_moov, max))
 }
 
+// Maybe instead of ordering the moovs, just order the RatingList which has
+// index of the top moves. May be lighter memory usage.
+// TODO: This needs a lot of work.
+/// Sorts the moves acording to the ranking array.
 fn rank_moovs(
-    board: &BoardState,
     moovs: &mut MoovList,
-    magic: &Magic
+    rating: &mut RatingList,
 ) {
-    for i in 0..moovs.len() {
-        let moov = moovs.get(i as usize);
+    // for i in 0..moovs.len() {
+    //     let moov = moovs.get(i as usize);
+    // }
+    // A simple impl of quicksort.
+    if rating.len() <= 1 {
+        return;
     }
+
+    let pivot_index = partition(rating);
+
+    let (left, right) = rating.split_at_mut(pivot_index);
+
+    rank_moovs(left);
+    rank_moovs(&mut right[1..]);
+}
+
+fn partition(moovs: &mut MoovList, rating: &mut RatingList) -> usize {
+    let len = rating.len();
+
+    // Set last element as pivot.
+    let pivot_index = len - 1;
+
+    let mut i = 0;
+    for j in 0..pivot_index {
+        // If the current element is less than or equal to the pivot.
+        if rating[j] <= rating[pivot_index] {
+            rating.swap(i, j);
+            i += 1;
+        }
+    }
+    rating.swap(i, pivot_index);
+    i // pivot index.
 }
 
 // Static evaluation.
