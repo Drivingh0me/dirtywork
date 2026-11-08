@@ -58,6 +58,50 @@ struct Branch {
     min: u16,
 }
 
+struct Rating {
+    rating: u16,
+    index: u8,
+}
+
+impl Rating {
+    fn new() -> Self {
+        Self {
+            rating: 0,
+            index: 0,
+        }
+    }
+}
+
+struct RatingList {
+    ratings: [Rating; 256],
+    len: u8,
+}
+
+impl RatingList {
+    fn new() -> Self {
+        Self {
+            ratings: [Rating::new(); 256],
+            len: 0,
+        }
+    }
+
+    fn len(&self) -> usize {
+        self.len as usize
+    }
+
+    fn swap(&mut self, a: u8, b: u8) {
+        if a > self.len || b > self.len {
+            panic!("tried to swap an index of RatingList that does not exist");
+        }
+
+        let temp = self.ratings[a];
+
+        self.ratings[a] = self.ratings[b];
+
+        self.ratings[b] = temp;
+    }
+}
+
 // Need to make this continuously return according to UCI standard, and can
 // stop. Make it return depth, score, etc  that can be parsed to
 // form a UCI standard stdout through UI.
@@ -72,10 +116,6 @@ pub fn dw_analysis(
         .board
         .last()
         .expect("There should always be a last boardstate in gamestate");
-
-    // Loop over this. ------
-    // Make a legal move.
-    // let pos_eval = evaluate_pos(&board_state, &magic);
 
     let fundamental_moovs = pieces::legal_moovs(&board_state, &magic);
 
@@ -112,40 +152,36 @@ pub fn dw_analysis(
 
     println!("top move is: {}", top_moov.string());
 
-    //------------------------
-
     let best_moov = board_state.from_moov(top_moov);
 
     println!("ran analysis!");
     Ok((best_moov, max))
 }
 
-// Maybe instead of ordering the moovs, just order the RatingList which has
-// index of the top moves. May be lighter memory usage.
 // TODO: This needs a lot of work.
 /// Sorts the moves acording to the ranking array.
 fn rank_moovs(
-    moovs: &mut MoovList,
-    rating: &mut RatingList,
+    ratings: &mut RatingList,
 ) {
     // for i in 0..moovs.len() {
     //     let moov = moovs.get(i as usize);
     // }
+
     // A simple impl of quicksort.
-    if rating.len() <= 1 {
+    if ratings.len() <= 1 {
         return;
     }
 
-    let pivot_index = partition(rating);
+    let pivot_index = partition(ratings);
 
-    let (left, right) = rating.split_at_mut(pivot_index);
+    let (left, right) = ratings.split_at_mut(pivot_index);
 
     rank_moovs(left);
     rank_moovs(&mut right[1..]);
 }
 
-fn partition(moovs: &mut MoovList, rating: &mut RatingList) -> usize {
-    let len = rating.len();
+fn partition(ratings: &mut RatingList) -> usize {
+    let len = ratings.len();
 
     // Set last element as pivot.
     let pivot_index = len - 1;
@@ -153,12 +189,12 @@ fn partition(moovs: &mut MoovList, rating: &mut RatingList) -> usize {
     let mut i = 0;
     for j in 0..pivot_index {
         // If the current element is less than or equal to the pivot.
-        if rating[j] <= rating[pivot_index] {
-            rating.swap(i, j);
+        if ratings[j] <= ratings[pivot_index] {
+            ratings.swap(i, j);
             i += 1;
         }
     }
-    rating.swap(i, pivot_index);
+    ratings.swap(i, pivot_index);
     i // pivot index.
 }
 
