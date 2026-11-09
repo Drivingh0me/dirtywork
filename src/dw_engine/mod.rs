@@ -58,6 +58,7 @@ struct Branch {
     min: u16,
 }
 
+#[derive(Copy, Clone)]
 struct Rating {
     rating: u16,
     index: u8,
@@ -94,11 +95,21 @@ impl RatingList {
             panic!("tried to swap an index of RatingList that does not exist");
         }
 
-        let temp = self.ratings[a];
+        let temp = self.ratings[a as usize];
 
-        self.ratings[a] = self.ratings[b];
+        self.ratings[a as usize] = self.ratings[b as usize];
 
-        self.ratings[b] = temp;
+        self.ratings[b as usize] = temp;
+    }
+
+    // This needs to somehow split a ratingList.
+    // Need to ve able to make a slice of this.
+    fn split_at_mut(&mut self, index u8) {
+        //
+    }
+
+    fn get (&self, i: u8) -> Rating {
+        self.ratings[i as usize]
     }
 }
 
@@ -124,12 +135,12 @@ pub fn dw_analysis(
 
     // Use this to keep memory of branches and how search proceeds.
     // Maybe trim to top 64 most likely instead of full MoovList.
-    // let mut tree = Vec::Branch::new();
+    let mut tree = Vec::<Branch>::new();
 
-    for i in fundamental_moovs.len() {
+    for i in 0..fundamental_moovs.len() {
         // Need to use this as a state, and recursively call tree
         // traversal to deepen select branches.
-        tree.push(Vec::<Branch>::new());
+        tree.push(Branch::new());
     }
 
     for i in 0..depth {
@@ -188,7 +199,7 @@ fn partition(ratings: &mut RatingList) -> usize {
     let mut i = 0;
     for j in 0..pivot_index {
         // If the current element is less than or equal to the pivot.
-        if ratings[j] <= ratings[pivot_index] {
+        if ratings.get(j) <= ratings[pivot_index] {
             ratings.swap(i, j);
             i += 1;
         }
