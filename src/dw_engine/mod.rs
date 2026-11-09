@@ -160,9 +160,7 @@ pub fn dw_analysis(
 
 // TODO: This needs a lot of work.
 /// Sorts the moves acording to the ranking array.
-fn rank_moovs(
-    ratings: &mut RatingList,
-) {
+fn rank_moovs(ratings: &mut RatingList) {
     // for i in 0..moovs.len() {
     //     let moov = moovs.get(i as usize);
     // }
@@ -183,6 +181,7 @@ fn rank_moovs(
 fn partition(ratings: &mut RatingList) -> usize {
     let len = ratings.len();
 
+    // Update this to choose from first last or middle elem.
     // Set last element as pivot.
     let pivot_index = len - 1;
 
