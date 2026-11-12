@@ -42,9 +42,11 @@ impl Default for GameState {
     }
 }
 
+// Need to impl Ord.
 struct Eval {
     eval: i16, // Evaluation in centipawns.
-    mate: i8, // How many moves till forced mate, zero is no mate.
+    mate: i8, // How many moves till forced mate, zero is mate
+    // and 255 is no mate.
 }
 
 impl Eval {
@@ -54,7 +56,7 @@ impl Eval {
 }
 
 enum Fork {
-    Branch(Branch),
+    Branches(Vec<Branch>),
     Leaf(BoardState),
 }
 
@@ -63,25 +65,39 @@ struct Branch {
     depth: u8,
     moovs: MoovList,
     ratings: Vec<Rating>,
-    children: Vec<Fork>,
+    children: Fork,
 }
 
 impl Branch {
-    fn new(leaf: BoardState, eval: &mut Eval) -> Self {
+    fn new(leaf: BoardState, eval: &mut Eval, depth: u8) -> Self {
         Self {
-            //
+            // A new branch is always one away from a leaf.
         }
     }
 
-    fn extend(&mut self, heap: &mut Vec<Self>) {
-        // Iff extend is called on leaf branch, call Branch::new(leaf)
-        // to end extend and return eval.
+    fn extend(&mut self) -> Eval {
+        // If extend is called on leaf branch, call Branch::new(leaf)
+        // to end extend.
+        let mut eval = Eval::new();
+
+        match self
+            .children
+            .get(i)
+            .expect("children should have i") {
+            Fork::Branch(branch) => eval = branch.extend(),
+            Fork::Leaf(leaf) => {
+                // Create new branch here.
+            },
+        }
+
+    eval
     }
 }
 
+// Consider impl Ord.
 #[derive(Copy, Clone)]
 struct Rating {
-    rating: u16,
+    rating: u16, // Need to change this to Eval.
     index: u8,
 }
 
@@ -167,7 +183,7 @@ pub fn dw_analysis(
         tree.push(Branch::new());
     }
 
-    // Deepen only select top moovs.
+    // Extend branches while memory lasts.
     for i in 0..depth {
         //
     }
