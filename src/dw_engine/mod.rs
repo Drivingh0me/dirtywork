@@ -11,6 +11,8 @@ use crate::dw_engine::boards::{Square};
 
 use crate::error::{Result, Error};
 
+use std::cmp::Reverse;
+
 // This  might not be necessary. Try only using BoardState.
 pub struct GameState {
     haswon: Option<Color>,
@@ -51,11 +53,30 @@ impl Eval {
     }
 }
 
+enum Fork {
+    Branch(Branch),
+    Leaf(BoardState),
+}
+
 // Need to be able to store data about braches for tree.
 struct Branch {
     depth: u8,
-    max: u16,
-    min: u16,
+    moovs: MoovList,
+    ratings: Vec<Rating>,
+    children: Vec<Fork>,
+}
+
+impl Branch {
+    fn new(leaf: BoardState, eval: &mut Eval) -> Self {
+        Self {
+            //
+        }
+    }
+
+    fn extend(&mut self, heap: &mut Vec<Self>) {
+        // Iff extend is called on leaf branch, call Branch::new(leaf)
+        // to end extend and return eval.
+    }
 }
 
 #[derive(Copy, Clone)]
@@ -73,45 +94,47 @@ impl Rating {
     }
 }
 
-struct RatingList {
-    ratings: [Rating; 256],
-    len: u8,
-}
+// struct RatingList {
+//     ratings: [Rating; 256],
+//     len: u8,
+//     start: u8, // Start and end allow slicing.
+//     end: u8,
+// }
 
-impl RatingList {
-    fn new() -> Self {
-        Self {
-            ratings: [Rating::new(); 256],
-            len: 0,
-        }
-    }
-
-    fn len(&self) -> usize {
-        self.len as usize
-    }
-
-    fn swap(&mut self, a: u8, b: u8) {
-        if a > self.len || b > self.len {
-            panic!("tried to swap an index of RatingList that does not exist");
-        }
-
-        let temp = self.ratings[a as usize];
-
-        self.ratings[a as usize] = self.ratings[b as usize];
-
-        self.ratings[b as usize] = temp;
-    }
-
-    // This needs to somehow split a ratingList.
-    // Need to ve able to make a slice of this.
-    fn split_at_mut(&mut self, index u8) {
-        //
-    }
-
-    fn get (&self, i: u8) -> Rating {
-        self.ratings[i as usize]
-    }
-}
+// impl RatingList {
+//     fn new() -> Self {
+//         Self {
+//             ratings: [Rating::new(); 256],
+//             len: 0,
+//         }
+//     }
+//
+//     fn len(&self) -> usize {
+//         self.len as usize
+//     }
+//
+//     fn swap(&mut self, a: u8, b: u8) {
+//         if a > self.len || b > self.len {
+//             panic!("tried to swap an index of RatingList that does not exist");
+//         }
+//
+//         let temp = self.ratings[a as usize];
+//
+//         self.ratings[a as usize] = self.ratings[b as usize];
+//
+//         self.ratings[b as usize] = temp;
+//     }
+//
+//     // This needs to somehow split a ratingList.
+//     // Need to ve able to make a slice of this.
+//     fn split_at_mut(&mut self, index u8) {
+//         //
+//     }
+//
+//     fn get (&self, i: u8) -> Rating {
+//         self.ratings[i as usize]
+//     }
+// }
 
 // Need to make this continuously return according to UCI standard, and can
 // stop. Make it return depth, score, etc  that can be parsed to
@@ -137,12 +160,14 @@ pub fn dw_analysis(
     // Maybe trim to top 64 most likely instead of full MoovList.
     let mut tree = Vec::<Branch>::new();
 
+    // Get initial rating for all moovs.
     for i in 0..fundamental_moovs.len() {
         // Need to use this as a state, and recursively call tree
         // traversal to deepen select branches.
         tree.push(Branch::new());
     }
 
+    // Deepen only select top moovs.
     for i in 0..depth {
         //
     }
@@ -169,44 +194,47 @@ pub fn dw_analysis(
     Ok((best_moov, max))
 }
 
-// TODO: This needs a lot of work.
-/// Sorts the moves acording to the ranking array.
-fn rank_moovs(ratings: &mut RatingList) {
-    // for i in 0..moovs.len() {
-    //     let moov = moovs.get(i as usize);
-    // }
-
-    // A simple impl of quicksort.
-    if ratings.len() <= 1 {
-        return;
-    }
-
-    let pivot_index = partition(ratings);
-
-    let (left, right) = ratings.split_at_mut(pivot_index);
-
-    rank_moovs(left);
-    rank_moovs(&mut right[1..]);
+fn sort_ratings(ratings: &mut Vec<Rating>) {
+    ratings.sort_by_key(|r| Reverse(r.rating));
 }
 
-fn partition(ratings: &mut RatingList) -> usize {
-    let len = ratings.len();
-
-    // Update this to choose from first last or middle elem.
-    // Set last element as pivot.
-    let pivot_index = len - 1;
-
-    let mut i = 0;
-    for j in 0..pivot_index {
-        // If the current element is less than or equal to the pivot.
-        if ratings.get(j) <= ratings[pivot_index] {
-            ratings.swap(i, j);
-            i += 1;
-        }
-    }
-    ratings.swap(i, pivot_index);
-    i // pivot index.
-}
+// /// Sorts the moves acording to the ranking array.
+// fn rank_moovs(ratings: &mut RatingList) {
+//     // for i in 0..moovs.len() {
+//     //     let moov = moovs.get(i as usize);
+//     // }
+//
+//     // A simple impl of quicksort.
+//     if ratings.len() <= 1 {
+//         return;
+//     }
+//
+//     let pivot_index = partition(ratings);
+//
+//     let (left, right) = ratings.split_at_mut(pivot_index);
+//
+//     rank_moovs(left);
+//     rank_moovs(&mut right[1..]);
+// }
+//
+// fn partition(ratings: &mut RatingList) -> usize {
+//     let len = ratings.len();
+//
+//     // Update this to choose from first last or middle elem.
+//     // Set last element as pivot.
+//     let pivot_index = len - 1;
+//
+//     let mut i = 0;
+//     for j in 0..pivot_index {
+//         // If the current element is less than or equal to the pivot.
+//         if ratings.get(j) <= ratings[pivot_index] {
+//             ratings.swap(i, j);
+//             i += 1;
+//         }
+//     }
+//     ratings.swap(i, pivot_index);
+//     i // pivot index.
+// }
 
 // Static evaluation.
 fn evaluate_pos(state: &BoardState, magic: &Magic) -> f32 {
