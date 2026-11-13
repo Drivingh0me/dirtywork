@@ -44,14 +44,23 @@ impl Default for GameState {
 
 // Need to impl Ord.
 struct Eval {
+    depth: i8, // How many moovs ahead have been used to get eval.
     eval: i16, // Evaluation in centipawns.
     mate: i8, // How many moves till forced mate, zero is mate
     // and 255 is no mate.
 }
 
 impl Eval {
-    fn new() -> Self {
-        Self { eval: 0, mate: 0 }
+    fn new(depth: u8) -> Self {
+        Self { depth: depth, eval: 0, mate: 0 }
+    }
+
+    fn update(&mut self, val: Eval) {
+        if self.depth < 255 {
+            self.depth += 1;
+        }
+        self.eval = val.eval;
+        self.mate = val.mate;
     }
 }
 
@@ -62,95 +71,92 @@ enum Fork {
 
 // Need to be able to store data about braches for tree.
 struct Branch {
-    depth: u8,
     moovs: MoovList,
     ratings: Vec<Rating>,
     children: Fork,
 }
 
 impl Branch {
-    fn new(leaf: BoardState, eval: &mut Eval, depth: u8) -> Self {
+    fn new(leaf: &BoardState, eval: &mut Eval, magic: &Magic) -> Self {
+        let moovs = pieces::legal_moovs(leaf, magic);
+        let ratings = Vec::with_capacity(moovs.len());
+
+        // Bubble up the top eval.
+        eval.update(evaluate_pos(leaf, magic));
+        let depth = eval.depth;
+
+        for i in 0..moovs.len() {
+            ratings.push(Rating::new(i, depth));
+        }
+
         Self {
+            moovs: moovs,
+            ratings: ratings,
             // A new branch is always one away from a leaf.
+            children: Fork::Leaf(leaf),
         }
     }
 
     fn extend(&mut self) -> Eval {
-        // If extend is called on leaf branch, call Branch::new(leaf)
-        // to end extend.
-        let mut eval = Eval::new();
-
         match self
             .children
             .get(i)
             .expect("children should have i") {
-            Fork::Branch(branch) => eval = branch.extend(),
+            Fork::Branches(branches) => {
+                // Extend top branches.
+                let top_branches = ;
+                for branch in top_branches {
+                    self.ratings
+                        .get_mut(branch)
+                        .expect("branch should be in ratings")
+                        .set(branch.extend());
+                }
+            },
             Fork::Leaf(leaf) => {
-                // Create new branch here.
+                // Create new branches and rank them.
+                let mut child_branches: Vec<Branch> = Vec::
+                    with_capacity(self.moovs.len());
+
+                for branch_moov in self.moovs.len() {
+                    child_branches.push(Branch::new(
+                        leaf.from_moov(branch_moov),
+                        // This may not be indexing fresh ratings correctly?
+                        self.ratings
+                            .get_mut(branch_moov)
+                            .expect("leaf branch should be in ratings")
+                            .rating,
+                        magic
+                    ));
+                }
+                self.children = Fork::Branches(child_branches);
             },
         }
+        sort_ratings(self.ratings);
 
-    eval
+        // Return top eval
+        self.ratings.get(0).expect("There should be at least one rating")
     }
 }
 
 // Consider impl Ord.
 #[derive(Copy, Clone)]
 struct Rating {
-    rating: u16, // Need to change this to Eval.
-    index: u8,
+    rating: Eval,
+    index: u8, // Index of moovlist that this rating describes.
 }
 
 impl Rating {
-    fn new() -> Self {
+    fn new(index: usize, depth: u8) -> Self {
         Self {
-            rating: 0,
-            index: 0,
+            rating: Eval::new(depth),
+            index: index,
         }
     }
+
+    fn set(&mut self, val: Self) {
+        *self = val;
+    }
 }
-
-// struct RatingList {
-//     ratings: [Rating; 256],
-//     len: u8,
-//     start: u8, // Start and end allow slicing.
-//     end: u8,
-// }
-
-// impl RatingList {
-//     fn new() -> Self {
-//         Self {
-//             ratings: [Rating::new(); 256],
-//             len: 0,
-//         }
-//     }
-//
-//     fn len(&self) -> usize {
-//         self.len as usize
-//     }
-//
-//     fn swap(&mut self, a: u8, b: u8) {
-//         if a > self.len || b > self.len {
-//             panic!("tried to swap an index of RatingList that does not exist");
-//         }
-//
-//         let temp = self.ratings[a as usize];
-//
-//         self.ratings[a as usize] = self.ratings[b as usize];
-//
-//         self.ratings[b as usize] = temp;
-//     }
-//
-//     // This needs to somehow split a ratingList.
-//     // Need to ve able to make a slice of this.
-//     fn split_at_mut(&mut self, index u8) {
-//         //
-//     }
-//
-//     fn get (&self, i: u8) -> Rating {
-//         self.ratings[i as usize]
-//     }
-// }
 
 // Need to make this continuously return according to UCI standard, and can
 // stop. Make it return depth, score, etc  that can be parsed to
@@ -210,50 +216,15 @@ pub fn dw_analysis(
     Ok((best_moov, max))
 }
 
+// TODO: Rank as best first for whos turn it is, not just white.
+// Or choose last elem when black is turn to play.
 fn sort_ratings(ratings: &mut Vec<Rating>) {
     ratings.sort_by_key(|r| Reverse(r.rating));
 }
 
-// /// Sorts the moves acording to the ranking array.
-// fn rank_moovs(ratings: &mut RatingList) {
-//     // for i in 0..moovs.len() {
-//     //     let moov = moovs.get(i as usize);
-//     // }
-//
-//     // A simple impl of quicksort.
-//     if ratings.len() <= 1 {
-//         return;
-//     }
-//
-//     let pivot_index = partition(ratings);
-//
-//     let (left, right) = ratings.split_at_mut(pivot_index);
-//
-//     rank_moovs(left);
-//     rank_moovs(&mut right[1..]);
-// }
-//
-// fn partition(ratings: &mut RatingList) -> usize {
-//     let len = ratings.len();
-//
-//     // Update this to choose from first last or middle elem.
-//     // Set last element as pivot.
-//     let pivot_index = len - 1;
-//
-//     let mut i = 0;
-//     for j in 0..pivot_index {
-//         // If the current element is less than or equal to the pivot.
-//         if ratings.get(j) <= ratings[pivot_index] {
-//             ratings.swap(i, j);
-//             i += 1;
-//         }
-//     }
-//     ratings.swap(i, pivot_index);
-//     i // pivot index.
-// }
-
 // Static evaluation.
-fn evaluate_pos(state: &BoardState, magic: &Magic) -> f32 {
+// TODO: Add checkmate knowledge.
+fn evaluate_pos(state: &BoardState, magic: &Magic) -> Eval {
     let material_weight: f32 = 0.5;
     let control_weight: f32 = 0.3;
     let agro_weight: f32 = 0.2;
