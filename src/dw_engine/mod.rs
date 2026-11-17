@@ -6,12 +6,12 @@ pub use magic::{initialize_magic, search_magic};
 pub use boards::{BitBoard, BoardState};
 pub use pieces::{PieceType, Color};
 use crate::dw_engine::magic::Magic;
-use crate::dw_engine::pieces::{Moov};
+use crate::dw_engine::pieces::{Moov, MoovList};
 use crate::dw_engine::boards::{Square};
 
 use crate::error::{Result, Error};
 
-use std::cmp::Reverse;
+use std::cmp::{Ordering, Reverse};
 
 // This  might not be necessary. Try only using BoardState.
 pub struct GameState {
@@ -43,11 +43,32 @@ impl Default for GameState {
 }
 
 // Need to impl Ord.
+#[derive(Copy, Clone)]
 struct Eval {
-    depth: i8, // How many moovs ahead have been used to get eval.
+    depth: u8, // How many moovs ahead have been used to get eval.
     eval: i16, // Evaluation in centipawns.
     mate: i8, // How many moves till forced mate, zero is mate
     // and 255 is no mate.
+}
+
+impl PartialEq for Eval {
+    fn eq(&self, other: &Self) -> bool {
+        //
+    }
+}
+
+impl Eq for Eval {}
+
+impl PartialOrd for Eval {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        //
+    }
+}
+
+impl Ord for Eval {
+    fn cmp(&self, other: &Self) -> Ordering {
+        //
+    }
 }
 
 impl Eval {
@@ -79,50 +100,47 @@ struct Branch {
 impl Branch {
     fn new(leaf: &BoardState, eval: &mut Eval, magic: &Magic) -> Self {
         let moovs = pieces::legal_moovs(leaf, magic);
-        let ratings = Vec::with_capacity(moovs.len());
+        let mut ratings = Vec::with_capacity(moovs.len() as usize);
 
         // Bubble up the top eval.
         eval.update(evaluate_pos(leaf, magic));
         let depth = eval.depth;
 
         for i in 0..moovs.len() {
-            ratings.push(Rating::new(i, depth));
+            ratings.push(Rating::new(i as usize, depth));
         }
 
         Self {
             moovs: moovs,
             ratings: ratings,
             // A new branch is always one away from a leaf.
-            children: Fork::Leaf(leaf),
+            children: Fork::Leaf(*leaf),
         }
     }
 
-    fn extend(&mut self) -> Eval {
-        match self
-            .children
-            .get(i)
-            .expect("children should have i") {
+    fn extend(&mut self, magic: &Magic) -> Eval {
+        match self.children {
             Fork::Branches(branches) => {
                 // Extend top branches.
-                let top_branches = ;
+                let top_branches = 0..4;
                 for branch in top_branches {
                     self.ratings
                         .get_mut(branch)
                         .expect("branch should be in ratings")
-                        .set(branch.extend());
+                        .set(branches[branch].extend(magic));
                 }
             },
             Fork::Leaf(leaf) => {
                 // Create new branches and rank them.
                 let mut child_branches: Vec<Branch> = Vec::
-                    with_capacity(self.moovs.len());
+                    with_capacity(self.moovs.len() as usize);
 
-                for branch_moov in self.moovs.len() {
+                for branch_moov in 0..self.moovs.len() {
                     child_branches.push(Branch::new(
-                        leaf.from_moov(branch_moov),
+                        &leaf.from_moov(self.moovs.get(branch_moov as usize)),
                         // This may not be indexing fresh ratings correctly?
-                        self.ratings
-                            .get_mut(branch_moov)
+                        &mut self.ratings
+                            .get_mut(branch_moov as usize)
                             .expect("leaf branch should be in ratings")
                             .rating,
                         magic
@@ -131,10 +149,13 @@ impl Branch {
                 self.children = Fork::Branches(child_branches);
             },
         }
-        sort_ratings(self.ratings);
+        sort_ratings(&mut self.ratings);
 
         // Return top eval
-        self.ratings.get(0).expect("There should be at least one rating")
+        self.ratings
+            .get(0)
+            .expect("There should be at least one rating")
+            .rating
     }
 }
 
@@ -149,13 +170,17 @@ impl Rating {
     fn new(index: usize, depth: u8) -> Self {
         Self {
             rating: Eval::new(depth),
-            index: index,
+            index: index as u8,
         }
     }
 
-    fn set(&mut self, val: Self) {
-        *self = val;
+    fn set(&mut self, val: Eval) {
+        self.rating = val;
     }
+
+    // fn update(eval: Eval, index: u8) -> Self {
+    //     Self { eval: eval, index: index }
+    // }
 }
 
 // Need to make this continuously return according to UCI standard, and can
@@ -176,18 +201,26 @@ pub fn dw_analysis(
     let fundamental_moovs = pieces::legal_moovs(&board_state, &magic);
 
     let mut top_moov = Moov::new();
-    let mut max = -100.0;
 
     // Use this to keep memory of branches and how search proceeds.
     // Maybe trim to top 64 most likely instead of full MoovList.
     let mut tree = Vec::<Branch>::new();
+    let mut fundamental_ratings = Vec::<Rating>::new();
 
     // Get initial rating for all moovs.
     for i in 0..fundamental_moovs.len() {
         // Need to use this as a state, and recursively call tree
         // traversal to deepen select branches.
-        tree.push(Branch::new());
+        tree.push(Branch::new(
+            &board_state.from_moov(fundamental_moovs.get(i as usize)),
+            &mut fundamental_ratings.get(i as usize)
+                .expect("ratings should be size of fundamentals")
+                .rating,
+            magic
+        ));
     }
+
+    sort_ratings(&mut fundamental_ratings);
 
     // Extend branches while memory lasts.
     for i in 0..depth {
@@ -198,22 +231,21 @@ pub fn dw_analysis(
     for i in 0..fundamental_moovs.len() {
         let moov = fundamental_moovs.get(i as usize);
         println!("{}", moov.string());
-        let board = board_state.from_moov(moov);
-        let eval = evaluate_pos(&board, &magic);
-
-        if eval > max {
-            top_moov = moov;
-            max = eval;
-        }
     }
 
+    top_moov = fundamental_moovs.get(
+        fundamental_ratings
+            .get(0)
+            .expect("idk man")
+        .index as usize
+    );
 
     println!("top move is: {}", top_moov.string());
 
     let best_moov = board_state.from_moov(top_moov);
 
     println!("ran analysis!");
-    Ok((best_moov, max))
+    Ok((best_moov, 0.0))
 }
 
 // TODO: Rank as best first for whos turn it is, not just white.
