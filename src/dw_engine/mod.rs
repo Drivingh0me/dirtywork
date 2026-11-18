@@ -235,7 +235,12 @@ pub fn dw_analysis(
 
     // Extend branches while memory lasts.
     for i in 0..depth {
-        //
+        for i in 0..fundamental_moovs.len() {
+            let x = fundamental_ratings[i as usize].index;
+            fundamental_ratings[i as usize]
+                .set(tree[x as usize]
+                    .extend(&magic));
+        }
         sort_ratings(&mut fundamental_ratings);
     }
 
@@ -298,22 +303,22 @@ fn aggression(state: &BoardState) -> f32 {
 }
 
 fn count_material(state: &BoardState) -> f32 {
-    let p = state.get_bb(PieceType::Pawn, Color::White).how_many()
-        - state.get_bb(PieceType::Pawn, Color::Black).how_many();
-    let n = state.get_bb(PieceType::Knight, Color::White).how_many()
-        - state.get_bb(PieceType::Knight, Color::Black).how_many();
-    let b = state.get_bb(PieceType::Bishop, Color::White).how_many()
-        - state.get_bb(PieceType::Bishop, Color::Black).how_many();
-    let r = state.get_bb(PieceType::Rook, Color::White).how_many()
-        - state.get_bb(PieceType::Rook, Color::Black).how_many();
-    let q = state.get_bb(PieceType::Queen, Color::White).how_many()
-        - state.get_bb(PieceType::Queen, Color::Black).how_many();
+    let p: f32 = state.get_bb(PieceType::Pawn, Color::White).how_many() as f32
+        - state.get_bb(PieceType::Pawn, Color::Black).how_many() as f32;
+    let n: f32 = state.get_bb(PieceType::Knight, Color::White).how_many() as f32
+        - state.get_bb(PieceType::Knight, Color::Black).how_many() as f32;
+    let b: f32 = state.get_bb(PieceType::Bishop, Color::White).how_many() as f32
+        - state.get_bb(PieceType::Bishop, Color::Black).how_many() as f32;
+    let r: f32 = state.get_bb(PieceType::Rook, Color::White).how_many() as f32
+        - state.get_bb(PieceType::Rook, Color::Black).how_many() as f32;
+    let q: f32 = state.get_bb(PieceType::Queen, Color::White).how_many() as f32
+        - state.get_bb(PieceType::Queen, Color::Black).how_many() as f32;
 
-    let p = p as f32;
-    let n = n as f32;
-    let b = b as f32;
-    let r = r as f32;
-    let q = q as f32;
+    // let p = p as f32;
+    // let n = n as f32;
+    // let b = b as f32;
+    // let r = r as f32;
+    // let q = q as f32;
 
     1.0 * p + 3.0 * n + 3.0 * b + 5.0 * r + 9.0 * q
 }
