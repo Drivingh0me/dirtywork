@@ -252,14 +252,20 @@ pub fn dw_analysis(
 
     let best_moov = board_state.from_moov(top_moov);
 
+    let eval = fundamental_ratings
+        .get(0)
+        .expect("mcflubber")
+        .rating
+        .eval as f32;
+
     println!("ran analysis!");
-    Ok((best_moov, 0.0))
+    Ok((best_moov, eval))
 }
 
 // TODO: Rank as best first for whos turn it is, not just white.
 // Or choose last elem when black is turn to play.
 fn sort_ratings(ratings: &mut Vec<Rating>) {
-    ratings.sort_by_key(|r| Reverse(r.rating));
+    ratings.sort_by_key(|r| r.rating);
 }
 
 // Static evaluation.
