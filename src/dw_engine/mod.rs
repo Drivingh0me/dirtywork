@@ -43,41 +43,47 @@ impl Default for GameState {
 }
 
 // Need to impl Ord.
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq, Eq)]
 struct Eval {
     depth: u8, // How many moovs ahead have been used to get eval.
     eval: i16, // Evaluation in centipawns.
     mate: i8, // How many moves till forced mate, zero is mate
-    // and 255 is no mate.
+    // and -128 is no mate, positive is white.
 }
 
-impl PartialEq for Eval {
-    fn eq(&self, other: &Self) -> bool {
-        //
-    }
-}
-
-impl Eq for Eval {}
-
-impl PartialOrd for Eval {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        //
-    }
-}
+// impl PartialEq for Eval {
+//     fn eq(&self, other: &Self) -> bool {
+//         //
+//         true
+//     }
+// }
+//
+// impl Eq for Eval {}
 
 impl Ord for Eval {
     fn cmp(&self, other: &Self) -> Ordering {
-        //
+        if self.mate != -128
+            || other.mate != -128 {
+            return self.mate.cmp(&other.mate);
+        }
+
+        other.eval.cmp(&self.eval)
+    }
+}
+
+impl PartialOrd for Eval {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
     }
 }
 
 impl Eval {
-    fn new(depth: u8) -> Self {
-        Self { depth: depth, eval: 0, mate: 0 }
+    fn new(eval: i16, depth: u8) -> Self {
+        Self { depth: depth, eval: eval, mate: -128 }
     }
 
     fn update(&mut self, val: Eval) {
-        if self.depth < 255 {
+        if self.depth < 254 {
             self.depth += 1;
         }
         self.eval = val.eval;
@@ -119,7 +125,7 @@ impl Branch {
     }
 
     fn extend(&mut self, magic: &Magic) -> Eval {
-        match self.children {
+        match &mut self.children {
             Fork::Branches(branches) => {
                 // Extend top branches.
                 let top_branches = 0..4;
@@ -169,7 +175,7 @@ struct Rating {
 impl Rating {
     fn new(index: usize, depth: u8) -> Self {
         Self {
-            rating: Eval::new(depth),
+            rating: Eval::new(0, depth),
             index: index as u8,
         }
     }
@@ -198,6 +204,7 @@ pub fn dw_analysis(
         .last()
         .expect("There should always be a last boardstate in gamestate");
 
+    // This is the trunk of the tree.
     let fundamental_moovs = pieces::legal_moovs(&board_state, &magic);
 
     let mut top_moov = Moov::new();
@@ -207,13 +214,17 @@ pub fn dw_analysis(
     let mut tree = Vec::<Branch>::new();
     let mut fundamental_ratings = Vec::<Rating>::new();
 
+    for i in 0..fundamental_moovs.len() {
+        fundamental_ratings.push(Rating::new(i as usize, 0));
+    }
+
     // Get initial rating for all moovs.
     for i in 0..fundamental_moovs.len() {
         // Need to use this as a state, and recursively call tree
         // traversal to deepen select branches.
         tree.push(Branch::new(
             &board_state.from_moov(fundamental_moovs.get(i as usize)),
-            &mut fundamental_ratings.get(i as usize)
+            &mut fundamental_ratings.get_mut(i as usize)
                 .expect("ratings should be size of fundamentals")
                 .rating,
             magic
@@ -225,6 +236,7 @@ pub fn dw_analysis(
     // Extend branches while memory lasts.
     for i in 0..depth {
         //
+        sort_ratings(&mut fundamental_ratings);
     }
 
     println!("fundamentals are:");
@@ -270,9 +282,13 @@ fn evaluate_pos(state: &BoardState, magic: &Magic) -> Eval {
     let agro = aggression(&state);
     // println!("aggression is: {}", agro);
 
-    (material_weight * material +
+    let val = (material_weight * material +
     control_weight * control +
-    agro_weight * agro)
+    agro_weight * agro);
+
+    let out = Eval::new(val as i16, 0);
+
+    out
 }
 
 fn aggression(state: &BoardState) -> f32 {
