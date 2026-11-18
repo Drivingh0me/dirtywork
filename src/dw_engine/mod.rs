@@ -51,15 +51,6 @@ struct Eval {
     // and -128 is no mate, positive is white.
 }
 
-// impl PartialEq for Eval {
-//     fn eq(&self, other: &Self) -> bool {
-//         //
-//         true
-//     }
-// }
-//
-// impl Eq for Eval {}
-
 impl Ord for Eval {
     fn cmp(&self, other: &Self) -> Ordering {
         if self.mate != -128
@@ -291,7 +282,7 @@ fn evaluate_pos(state: &BoardState, magic: &Magic) -> Eval {
     control_weight * control +
     agro_weight * agro);
 
-    let out = Eval::new(val as i16, 0);
+    let out = Eval::new((val * 100.0) as i16, 0);
 
     out
 }
