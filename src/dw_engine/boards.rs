@@ -371,7 +371,7 @@ impl Default for BoardState {
     }
 }
 
-
+// Zero indexed.
 #[derive(Clone, Copy)]
 pub(crate) struct Location {
     pub x: usize,
@@ -440,3 +440,27 @@ pub(crate) fn location(square: Square) -> Location {
     out
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Test location fn.
+    #[test]
+    fn test_location() {
+        let square = Square::set(8); // a2.
+
+        let location = location(square);
+
+        assert_eq!(location.x, 0);
+        assert_eq!(location.y, 1);
+    }
+
+    #[test]
+    fn test_long_notation() {
+        let square = Square::set(8); // a2.
+
+        let LongNotation = LongNotation::from_square(square);
+
+        assert_eq!(LongNotation.string, "a2");
+    }
+}

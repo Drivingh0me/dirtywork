@@ -180,6 +180,10 @@ fn get_moveboard(
     match piece {
         // This needs to be more complicated because of all of the pawn
         // capture mechanics and en passant.
+        // TODO: Add en passant capture.
+        // TODO: Add normal pawn capture.
+        // TODO: Make sure pawns can not capture forward, and a piece can
+        // block the first double moov.
         PieceType::Pawn => match color {
             Color::White => BitBoard::set_val(
                 WP_MOVS[square.index()] & !state.occupancy(all).bits
@@ -256,6 +260,8 @@ fn get_moveboard(
         },
         // Bitwise And with not(same color occupancy) to remove taking
         // own piece.
+        // TODO: Remove moovs where king walks to square that can be captured.
+        // TODO: Add castling with canceling if walks through check.
         PieceType::King => BitBoard::set_val(
             K_MOVS[square.index()] & !state.occupancy(friends).bits
         ),

@@ -270,6 +270,8 @@ fn sort_ratings(ratings: &mut Vec<Rating>) {
 
 // Static evaluation.
 // TODO: Add checkmate knowledge.
+// This also neds to know how to determine if mate is escapable to
+// calculate mate in x, or break out of mate eval.
 fn evaluate_pos(state: &BoardState, magic: &Magic) -> Eval {
     let material_weight: f32 = 0.5;
     let control_weight: f32 = 0.3;
@@ -378,14 +380,6 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_rook_moves() {
-    // Answer to rook on G2 moves.
-    let r: u64 = 215893514783949314;
-
-    let a: u64 = r;
-
-    // Set b equal to rook on G2 bitboard.
-    let mut b = 562949953421312;
-        assert_eq!(a, b);
+    fn test_measure_control() {
     }
 }
