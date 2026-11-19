@@ -2,7 +2,10 @@ use crate::error::{Result, Error};
 
 use super::pieces::{PieceType, Color, Occupier, Moov};
 
-// TODO: Convert u64 moveboards to BitBoard moveboards.
+// TODO: Bitboard are backwards from description and that is making
+// location and square wierd to work with, especially when printed.
+// Currently everything has been forced to work, but would be good idea
+// to make it correct. Currently 0 is h1 instead of a1.
 
 // For pawn, mut leave a "crumb" behind if moved 2 spaces on first move so
 // that another pawn can au-passant to capture.
@@ -16,7 +19,7 @@ pub struct BitBoard {
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Square {
     // 64 is invalid.
-    bits: u8, // From a1 -> h1 -> b1 -> h8.
+    bits: u8, // From a1 -> h1 -> a2 -> h8.
 }
 
 impl BitBoard {
@@ -31,6 +34,22 @@ impl BitBoard {
     /// Calculates how many pieces there are.
     pub fn how_many(self) -> u32 {
         self.bits.count_ones()
+    }
+
+    pub fn combine(&mut self, other: Self) {
+        self.bits |= other.bits;
+    }
+
+    pub fn clear_lowest(&mut self) {
+        self.bits &= (self.bits - 1);
+    }
+
+    pub fn remove(&mut self, other: Self) {
+        self.bits &= !other.bits;
+    }
+
+    pub fn and(&mut self, other: Self) {
+        self.bits &= other.bits;
     }
 
     // pub fn start(piece: PieceType, color: Color) -> Self {
@@ -403,14 +422,14 @@ impl LongNotation {
         };
 
         let file = match location.x {
-            0 => 'a',
-            1 => 'b',
-            2 => 'c',
-            3 => 'd',
-            4 => 'e',
-            5 => 'f',
-            6 => 'g',
-            7 => 'h',
+            7 => 'a',
+            6 => 'b',
+            5 => 'c',
+            4 => 'd',
+            3 => 'e',
+            2 => 'f',
+            1 => 'g',
+            0 => 'h',
             _ => 'X',
         };
 
@@ -421,7 +440,7 @@ impl LongNotation {
 impl Location {
     pub(crate) fn square(self) -> Square {
         let out = Square::set((self.x + self.y * 8) as u8);
-        if out.check() {
+        if !out.check() {
             return Square::err();
         }
 
@@ -453,6 +472,10 @@ mod tests {
 
         assert_eq!(location.x, 0);
         assert_eq!(location.y, 1);
+
+        let square_from_loc = location.square();
+
+        assert_eq!(square_from_loc.index(), 8);
     }
 
     #[test]

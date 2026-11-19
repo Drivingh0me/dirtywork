@@ -153,6 +153,11 @@ impl Moov {
         out.push_str(&start.string);
         out.push_str(&end.string);
 
+        // Debug
+        // let debug_str =
+        //     format!(": {} -> {}", start_square.index(), end_square.index());
+        // out.push_str(&debug_str);
+
         out
     }
 }
@@ -181,16 +186,51 @@ fn get_moveboard(
         // This needs to be more complicated because of all of the pawn
         // capture mechanics and en passant.
         // TODO: Add en passant capture.
-        // TODO: Add normal pawn capture.
-        // TODO: Make sure pawns can not capture forward, and a piece can
-        // block the first double moov.
         PieceType::Pawn => match color {
-            Color::White => BitBoard::set_val(
-                WP_MOVS[square.index()] & !state.occupancy(all).bits
-            ),
-            Color::Black => BitBoard::set_val(
-                BP_MOVS[square.index()] & !state.occupancy(all).bits
-            ),
+            Color::White => {
+                let mut walks = BitBoard::set_val(
+                    WP_MOVS[square.index()] & !state.occupancy(all).bits
+                );
+
+                if walks.how_many() == 1 {
+                    let mut jumped = BitBoard::set_val(
+                        WP_MOVS[square.index()]
+                    );
+                    jumped.clear_lowest();
+                    walks.remove(jumped);
+                }
+
+                let mut captures = BitBoard::set_val(
+                    WP_CAPT[square.index()] & !state.occupancy(friends).bits
+                );
+
+                captures.bits &= state.occupancy(foes).bits;
+
+                walks.combine(captures);
+                walks
+            },
+            Color::Black => {
+                let mut walks = BitBoard::set_val(
+                    BP_MOVS[square.index()] & !state.occupancy(all).bits
+                );
+
+                if walks.how_many() == 1 {
+                    let mut jumped = BitBoard::set_val(
+                        BP_MOVS[square.index()]
+                    );
+                    jumped.clear_lowest();
+                    walks.and(jumped);
+                }
+
+                let mut captures = BitBoard::set_val(
+                    BP_CAPT[square.index()] & !state.occupancy(friends).bits
+                );
+
+                captures.bits &= state.occupancy(foes).bits;
+
+                walks.combine(captures);
+                walks
+            },
         },
         PieceType::Knight => BitBoard::set_val(
             N_MOVS[square.index()] & !state.occupancy(friends).bits
@@ -324,3 +364,12 @@ pub(crate) fn legal_moovs(state: &BoardState, magic: &Magic) -> MoovList {
     out
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_moovs() {
+        assert_eq!(1, 1);
+    }
+}

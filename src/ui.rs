@@ -134,43 +134,43 @@ fn print_squares(squares: [char; 64]) {
             ws(sq[(2 * i + 1) * 8 + 7])
         );
     }
-    println!(" ABCDEFGH");
+    println!(" A B C D E F G H ");
 }
 
 fn ws(p: char) -> String {
     match p {
-        'p' => "\x1B[37;45mp\x1B[0m".to_string(),
-        'n' => "\x1B[37;45mn\x1B[0m".to_string(),
-        'b' => "\x1B[37;45mb\x1B[0m".to_string(),
-        'r' => "\x1B[37;45mr\x1B[0m".to_string(),
-        'q' => "\x1B[37;45mq\x1B[0m".to_string(),
-        'k' => "\x1B[37;45mk\x1B[0m".to_string(),
-        '1' => "\x1B[30;45mp\x1B[0m".to_string(),
-        '2' => "\x1B[30;45mn\x1B[0m".to_string(),
-        '3' => "\x1B[30;45mb\x1B[0m".to_string(),
-        '4' => "\x1B[30;45mr\x1B[0m".to_string(),
-        '5' => "\x1B[30;45mq\x1B[0m".to_string(),
-        '6' => "\x1B[30;45mk\x1B[0m".to_string(),
-        '_' => "\x1B[30;45m \x1B[0m".to_string(),
+        'p' => "\x1B[37;45mp \x1B[0m".to_string(),
+        'n' => "\x1B[37;45mn \x1B[0m".to_string(),
+        'b' => "\x1B[37;45mb \x1B[0m".to_string(),
+        'r' => "\x1B[37;45mr \x1B[0m".to_string(),
+        'q' => "\x1B[37;45mq \x1B[0m".to_string(),
+        'k' => "\x1B[37;45mk \x1B[0m".to_string(),
+        '1' => "\x1B[30;45mp \x1B[0m".to_string(),
+        '2' => "\x1B[30;45mn \x1B[0m".to_string(),
+        '3' => "\x1B[30;45mb \x1B[0m".to_string(),
+        '4' => "\x1B[30;45mr \x1B[0m".to_string(),
+        '5' => "\x1B[30;45mq \x1B[0m".to_string(),
+        '6' => "\x1B[30;45mk \x1B[0m".to_string(),
+        '_' => "\x1B[30;45m  \x1B[0m".to_string(),
         _ => "x".to_string(),
     }
 }
 
 fn bs(p: char) -> String {
     match p {
-        'p' => "\x1B[37;44mp\x1B[0m".to_string(),
-        'n' => "\x1B[37;44mn\x1B[0m".to_string(),
-        'b' => "\x1B[37;44mb\x1B[0m".to_string(),
-        'r' => "\x1B[37;44mr\x1B[0m".to_string(),
-        'q' => "\x1B[37;44mq\x1B[0m".to_string(),
-        'k' => "\x1B[37;44mk\x1B[0m".to_string(),
-        '1' => "\x1B[30;44mp\x1B[0m".to_string(),
-        '2' => "\x1B[30;44mn\x1B[0m".to_string(),
-        '3' => "\x1B[30;44mb\x1B[0m".to_string(),
-        '4' => "\x1B[30;44mr\x1B[0m".to_string(),
-        '5' => "\x1B[30;44mq\x1B[0m".to_string(),
-        '6' => "\x1B[30;44mk\x1B[0m".to_string(),
-        '_' => "\x1B[30;44m \x1B[0m".to_string(),
+        'p' => "\x1B[37;44mp \x1B[0m".to_string(),
+        'n' => "\x1B[37;44mn \x1B[0m".to_string(),
+        'b' => "\x1B[37;44mb \x1B[0m".to_string(),
+        'r' => "\x1B[37;44mr \x1B[0m".to_string(),
+        'q' => "\x1B[37;44mq \x1B[0m".to_string(),
+        'k' => "\x1B[37;44mk \x1B[0m".to_string(),
+        '1' => "\x1B[30;44mp \x1B[0m".to_string(),
+        '2' => "\x1B[30;44mn \x1B[0m".to_string(),
+        '3' => "\x1B[30;44mb \x1B[0m".to_string(),
+        '4' => "\x1B[30;44mr \x1B[0m".to_string(),
+        '5' => "\x1B[30;44mq \x1B[0m".to_string(),
+        '6' => "\x1B[30;44mk \x1B[0m".to_string(),
+        '_' => "\x1B[30;44m  \x1B[0m".to_string(),
         _ => "x".to_string(),
     }
 }
