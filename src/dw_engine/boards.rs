@@ -6,11 +6,12 @@ use super::pieces::{PieceType, Color, Occupier, Moov};
 // location and square wierd to work with, especially when printed.
 // Currently everything has been forced to work, but would be good idea
 // to make it correct. Currently 0 is h1 instead of a1.
+// I guess this is technically not an issue, and can be left this way.
 
 // For pawn, mut leave a "crumb" behind if moved 2 spaces on first move so
 // that another pawn can au-passant to capture.
 
-// Bitboard is a1 -> h1 -> a2 -> h2... -> h8
+// Bitboard is h1 -> a1 -> h2 -> a2... -> a8
 #[derive(Debug, PartialEq, Default, Clone, Copy)]
 pub struct BitBoard {
     pub bits: u64,
@@ -19,7 +20,7 @@ pub struct BitBoard {
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Square {
     // 64 is invalid.
-    bits: u8, // From a1 -> h1 -> a2 -> h8.
+    bits: u8, // From h1 -> a1 -> a2 -> a8.
 }
 
 impl BitBoard {

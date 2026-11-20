@@ -87,7 +87,7 @@ impl MoovList {
 #[derive(Copy, Clone, Debug)]
 pub(crate) struct Moov {
     // First 6 bits are from square, second 6 bits are to square,
-    // last 4 bits are flags:
+    // last 4 bits are flags: (these are all mutually exclusive)
     // Normal move,
     // Promotion to queen,
     // Promotion to rook,
@@ -96,10 +96,10 @@ pub(crate) struct Moov {
     // En passant,
     // Double pawn push,
     // White short castle,
-    // White ong castle,
+    // White long castle,
     // Black short castle,
     // Black long castle,
-    // Not a move,
+    // Not a move / Error,
     bits: u16,
 }
 
@@ -170,17 +170,23 @@ fn get_moveboard(
     square: Square,
     magic: &Magic
 ) -> BitBoard {
-    let friends = match color {
+    let my_color = match color {
         Color::White => Occupier::White,
         Color::Black => Occupier::Black,
     };
 
-    let foes = match color {
+    let friends = state.occupancy(my_color);
+
+    let other_color = match color {
         Color::White => Occupier::Black,
         Color::Black => Occupier::White,
     };
 
-    let all = Occupier::Both;
+    let foes = state.occupancy(other_color);
+
+    let both_colors = Occupier::Both;
+
+    let everyone = state.occupancy(both_colors);
 
     match piece {
         // This needs to be more complicated because of all of the pawn
@@ -188,10 +194,11 @@ fn get_moveboard(
         // TODO: Add en passant capture.
         PieceType::Pawn => match color {
             Color::White => {
-                let mut walks = BitBoard::set_val(
-                    WP_MOVS[square.index()] & !state.occupancy(all).bits
-                );
+                // Normal waling moovs.
+                let mut walks = BitBoard::set_val(WP_MOVS[square.index()]);
+                walks.remove(everyone);
 
+                // Makes sure pawn respects blockers.
                 if walks.how_many() == 1 {
                     let mut jumped = BitBoard::set_val(
                         WP_MOVS[square.index()]
@@ -200,19 +207,17 @@ fn get_moveboard(
                     walks.remove(jumped);
                 }
 
-                let mut captures = BitBoard::set_val(
-                    WP_CAPT[square.index()] & !state.occupancy(friends).bits
-                );
+                let mut captures = BitBoard::set_val(WP_CAPT[square.index()]);
+                captures.remove(friends);
 
-                captures.bits &= state.occupancy(foes).bits;
+                captures.and(foes);
 
                 walks.combine(captures);
                 walks
             },
             Color::Black => {
-                let mut walks = BitBoard::set_val(
-                    BP_MOVS[square.index()] & !state.occupancy(all).bits
-                );
+                let mut walks = BitBoard::set_val(BP_MOVS[square.index()]);
+                walks.remove(everyone);
 
                 if walks.how_many() == 1 {
                     let mut jumped = BitBoard::set_val(
@@ -222,89 +227,98 @@ fn get_moveboard(
                     walks.and(jumped);
                 }
 
-                let mut captures = BitBoard::set_val(
-                    BP_CAPT[square.index()] & !state.occupancy(friends).bits
-                );
+                let mut captures = BitBoard::set_val(BP_CAPT[square.index()]);
+                captures.remove(friends);
 
-                captures.bits &= state.occupancy(foes).bits;
+                // TODO: Add crumb here for en passant.
+                captures.and(foes);
 
                 walks.combine(captures);
                 walks
             },
         },
-        PieceType::Knight => BitBoard::set_val(
-            N_MOVS[square.index()] & !state.occupancy(friends).bits
-        ),
+        PieceType::Knight => {
+            let mut moveboard = BitBoard::set_val(N_MOVS[square.index()]);
+            moveboard.remove(friends);
+            moveboard
+        },
         PieceType::Bishop => {
+            let mask = BitBoard::set_val(B_MASK[square.index()]);
+            let mut blockers = mask;
+            blockers.and(everyone);
+            let max_blockers = mask.how_many();
+
             let mut moveboard = get_slider_moveboard(
                 Slider::Bishop,
                 square,
-                BitBoard::set_val(
-                    state.occupancy(all).bits & B_MASK[square.index()]
-                ),
-                B_MASK.get(square.index())
-                    .expect("B_MASK to be size of index")
-                    .count_ones(),
+                blockers,
+                max_blockers,
                 magic
             );
 
-            BitBoard::set_val(moveboard.bits & !state.occupancy(friends).bits)
+            moveboard.remove(friends);
+            moveboard
         },
         PieceType::Rook => {
+            let mask = BitBoard::set_val(R_MASK[square.index()]);
+            let mut blockers = mask;
+            blockers.and(everyone);
+            let max_blockers = mask.how_many();
+
             let mut moveboard = get_slider_moveboard(
                 Slider::Rook,
                 square,
-                BitBoard::set_val(
-                    state.occupancy(all).bits & R_MASK[square.index()]
-                ),
-                R_MASK.get(square.index())
-                    .expect("R_MASK to be size of index")
-                    .count_ones(),
+                blockers,
+                max_blockers,
                 magic
             );
 
-            BitBoard::set_val(moveboard.bits & !state.occupancy(friends).bits)
+            moveboard.remove(friends);
+            moveboard
         },
         // Just bitwiseAnd rook and bishop moveboards for queen.
         PieceType::Queen => {
+            let mask = BitBoard::set_val(B_MASK[square.index()]);
+            let mut blockers = mask;
+            blockers.and(everyone);
+            let max_blockers = mask.how_many();
+
             let mut moveboard = get_slider_moveboard(
                 Slider::Bishop,
                 square,
-                BitBoard::set_val(
-                    state.occupancy(all).bits & B_MASK[square.index()]
-                ),
-                B_MASK.get(square.index())
-                    .expect("B_MASK to be size of index")
-                    .count_ones(),
+                blockers,
+                max_blockers,
                 magic
             );
 
-            moveboard.bits &= !state.occupancy(friends).bits;
+            let mask_rook = BitBoard::set_val(R_MASK[square.index()]);
+            let mut blockers_rook = mask_rook;
+            blockers_rook.and(everyone);
+            let max_blockers_rook = mask.how_many();
 
             let mut moveboard_rook = get_slider_moveboard(
                 Slider::Rook,
                 square,
-                BitBoard::set_val(
-                    state.occupancy(all).bits & R_MASK[square.index()]
-                ),
-                R_MASK.get(square.index())
-                    .expect("R_MASK to be size of index")
-                    .count_ones(),
+                blockers_rook,
+                max_blockers_rook,
                 magic
             );
 
-            moveboard_rook.bits &= !state.occupancy(friends).bits;
-
-            BitBoard::set_val(moveboard.bits | moveboard_rook.bits)
+            moveboard.combine(moveboard_rook);
+            moveboard.remove(friends);
+            moveboard
 
         },
         // Bitwise And with not(same color occupancy) to remove taking
         // own piece.
-        // TODO: Remove moovs where king walks to square that can be captured.
+        // TODO: Remove moovs where king walks on square that can be captured.
         // TODO: Add castling with canceling if walks through check.
-        PieceType::King => BitBoard::set_val(
-            K_MOVS[square.index()] & !state.occupancy(friends).bits
-        ),
+        PieceType::King => {
+        let mut moveboard = BitBoard::set_val(K_MOVS[square.index()]);
+
+        moveboard.remove(friends);
+        moveboard
+        },
     }
 }
 
@@ -360,7 +374,8 @@ pub(crate) fn legal_moovs(state: &BoardState, magic: &Magic) -> MoovList {
         }
     }
 
-    // Remove the non-legal moves.
+    // TODO: Remove illegal moovs like not responding to check or ignoring
+    // a pin against king.
     out
 }
 
