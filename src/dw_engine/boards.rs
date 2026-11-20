@@ -450,6 +450,19 @@ impl Location {
     pub(crate) fn index(self) -> usize {
         self.x + self.y * 8
     }
+
+    /// Returns that crow flies distance between the pieces.
+    pub fn distance(&self, other: &Self) -> f32 {
+        // pythagorean therum: c = sqrt(a^2 + b^2)
+        let a: f32 = self.x as f32 - other.x as f32;
+        let b: f32 = self.y as f32 - other.y as f32;
+
+        let c_squared = a * a + b * b;
+
+        let c = c_squared.sqrt();
+
+        c
+    }
 }
 
 pub(crate) fn location(square: Square) -> Location {

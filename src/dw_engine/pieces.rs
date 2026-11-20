@@ -364,6 +364,51 @@ pub(crate) fn legal_moovs(state: &BoardState, magic: &Magic) -> MoovList {
     out
 }
 
+pub(crate) fn aggression(state: &BoardState) -> f32 {
+    // See how close the average piece is to the king.
+    let white_king = location(*state
+        .squares(PieceType::King, Color::White)
+        .get(0)
+        .expect("Should only be one white king"));
+
+    let black_king = location(*state
+        .squares(PieceType::King, Color::Black)
+        .get(0)
+        .expect("Should only be one black king"));
+
+    let mut white: f32 = 0.0;
+    for piece in PieceType::ALL {
+        let squares = state.squares(piece, Color::White);
+        let mut i: usize = 0;
+        loop {
+            if squares[i] == Square::none() {
+                break;
+            }
+            let location = location(squares[i]);
+            let distance = location.distance(&black_king);
+            white += 1.0 / distance;
+            i += 1;
+        }
+    }
+
+    let mut black: f32 = 0.0;
+    for piece in PieceType::ALL {
+        let squares = state.squares(piece, Color::Black);
+        let mut i: usize = 0;
+        loop {
+            if squares[i] == Square::none() {
+                break;
+            }
+            let location = location(squares[i]);
+            let distance = location.distance(&white_king);
+            black += 1.0 / distance;
+            i += 1;
+        }
+    }
+
+    white - black
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

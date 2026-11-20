@@ -283,27 +283,16 @@ fn evaluate_pos(state: &BoardState, magic: &Magic) -> Eval {
     let agro_weight: f32 = 0.2;
 
     let material = count_material(&state);
-    // println!("material is: {}", material);
-
     let control = measure_control(&state, &magic);
-    // println!("control is: {}", control);
-
-    let agro = aggression(&state);
-    // println!("aggression is: {}", agro);
+    let agro = pieces::aggression(&state);
 
     let val = (material_weight * material +
-    control_weight * control +
-    agro_weight * agro);
+        control_weight * control +
+        agro_weight * agro);
 
     let out = Eval::new((val * 100.0) as i16, 0);
 
     out
-}
-
-fn aggression(state: &BoardState) -> f32 {
-    // See how close the average piece is to the king.
-
-    0.0
 }
 
 fn count_material(state: &BoardState) -> f32 {
