@@ -314,6 +314,8 @@ fn count_material(state: &BoardState) -> f32 {
         - state.get_bb(PieceType::Rook, Color::Black).how_many() as f32;
     let q: f32 = state.get_bb(PieceType::Queen, Color::White).how_many() as f32
         - state.get_bb(PieceType::Queen, Color::Black).how_many() as f32;
+    let k: f32 = state.get_bb(PieceType::King, Color::White).how_many() as f32
+        - state.get_bb(PieceType::King, Color::Black).how_many() as f32;
 
     // let p = p as f32;
     // let n = n as f32;
@@ -321,7 +323,7 @@ fn count_material(state: &BoardState) -> f32 {
     // let r = r as f32;
     // let q = q as f32;
 
-    1.0 * p + 3.0 * n + 3.0 * b + 5.0 * r + 9.0 * q
+    1.0 * p + 3.0 * n + 3.0 * b + 5.0 * r + 9.0 * q + 1000.0 * k
 }
 
 fn measure_control(state: &BoardState, magic: &Magic) -> f32 {

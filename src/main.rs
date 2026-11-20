@@ -34,7 +34,7 @@ fn run_app(args: cli::Args) -> Result<()> {
         ui::print_board(best_move)?;
 
         // Debug code. -----
-        for i in 0..48 {
+        for i in 0..40 {
             game.push(best_move);
             (best_move, eval) = dw_engine::dw_analysis(&game, depth, &magic)?;
             println!("eval: {}", eval);
