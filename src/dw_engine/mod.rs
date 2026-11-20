@@ -121,7 +121,15 @@ impl Branch {
         match &mut self.children {
             Fork::Branches(branches) => {
                 // Extend top branches.
-                let top_branches = 0..self.ratings.len();
+                let mut last: usize = 0;
+                let limit: u8 = 7;
+                if self.moovs.len() < limit {
+                    last = self.moovs.len() as usize;
+                } else {
+                    last = (limit + self.moovs.len() / 3) as usize;
+                }
+
+                let top_branches = 0..last;
                 for branch in top_branches {
                     self.ratings
                         .get_mut(branch)

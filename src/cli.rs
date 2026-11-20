@@ -47,6 +47,12 @@ pub struct Args {
         help = "Runs the app in debug mode",
         action = clap::ArgAction::SetTrue)]
     pub debug: bool,
+
+    // Engine depth.
+    #[arg(short,
+        help = "Sets the engine max depth to look",
+        default_value_t = 3)]
+    pub int: usize,
 }
 
 pub fn get_args() -> Result<Args>
