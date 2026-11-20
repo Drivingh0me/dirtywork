@@ -92,6 +92,7 @@ struct Branch {
     moovs: MoovList,
     ratings: Vec<Rating>,
     children: Fork,
+    turn: Color,
 }
 
 impl Branch {
@@ -112,6 +113,7 @@ impl Branch {
             ratings: ratings,
             // A new branch is always one away from a leaf.
             children: Fork::Leaf(*leaf),
+            turn: leaf.turn(),
         }
     }
 
@@ -146,7 +148,7 @@ impl Branch {
                 self.children = Fork::Branches(child_branches);
             },
         }
-        sort_ratings(&mut self.ratings);
+        sort_ratings(&mut self.ratings, self.turn);
 
         // Return top eval
         self.ratings
@@ -222,7 +224,7 @@ pub fn dw_analysis(
         ));
     }
 
-    sort_ratings(&mut fundamental_ratings);
+    sort_ratings(&mut fundamental_ratings, board_state.turn());
 
     // Extend branches while memory lasts.
     for i in 0..depth {
@@ -232,7 +234,7 @@ pub fn dw_analysis(
                 .set(tree[x as usize]
                     .extend(&magic));
         }
-        sort_ratings(&mut fundamental_ratings);
+        sort_ratings(&mut fundamental_ratings, board_state.turn());
     }
 
     println!("fundamentals are:");
@@ -264,8 +266,11 @@ pub fn dw_analysis(
 
 // TODO: Rank as best first for whos turn it is, not just white.
 // Or choose last elem when black is turn to play.
-fn sort_ratings(ratings: &mut Vec<Rating>) {
-    ratings.sort_by_key(|r| r.rating);
+fn sort_ratings(ratings: &mut Vec<Rating>, turn: Color) {
+    match turn {
+        Color::White => ratings.sort_by_key(|r| r.rating),
+        Color::Black => ratings.sort_by_key(|r| Reverse(r.rating)),
+    }
 }
 
 // Static evaluation.
