@@ -21,7 +21,7 @@ fn run_app(args: cli::Args) -> Result<()> {
     let magic = dw_engine::initialize_magic();
 
     // This should be changable by the UCI.
-    let depth = 6;
+    let depth = 3;
 
     if args.search {
         println!("start time: {}", Local::now());

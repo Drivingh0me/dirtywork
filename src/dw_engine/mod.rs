@@ -121,7 +121,7 @@ impl Branch {
         match &mut self.children {
             Fork::Branches(branches) => {
                 // Extend top branches.
-                let top_branches = 0..4;
+                let top_branches = 0..self.ratings.len();
                 for branch in top_branches {
                     self.ratings
                         .get_mut(branch)

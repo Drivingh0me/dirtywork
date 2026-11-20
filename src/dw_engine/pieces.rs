@@ -291,10 +291,12 @@ fn get_moveboard(
                 magic
             );
 
+            moveboard.remove(friends);
+
             let mask_rook = BitBoard::set_val(R_MASK[square.index()]);
             let mut blockers_rook = mask_rook;
             blockers_rook.and(everyone);
-            let max_blockers_rook = mask.how_many();
+            let max_blockers_rook = mask_rook.how_many();
 
             let mut moveboard_rook = get_slider_moveboard(
                 Slider::Rook,
@@ -304,8 +306,9 @@ fn get_moveboard(
                 magic
             );
 
+            moveboard_rook.remove(friends);
+
             moveboard.combine(moveboard_rook);
-            moveboard.remove(friends);
             moveboard
 
         },
