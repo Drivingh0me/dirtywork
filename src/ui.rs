@@ -2,8 +2,8 @@ use supports_color::Stream;
 
 use crate::error::{Error, Result};
 
-use crate::dw_engine::{BoardState, PieceType, Color};
-use crate::dw_engine::{get_piece_coords};
+use crate::engine::{BoardState, PieceType, Color};
+use crate::engine::{get_piece_coords};
 
 #[derive(Debug)]
 struct PrintableBoard {

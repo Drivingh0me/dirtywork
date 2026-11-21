@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
-use crate::dw_engine::boards::{self, BitBoard, Square, Location};
-use crate::dw_engine::pieces::{self, PieceType};
+use crate::engine::boards::{self, BitBoard, Square, Location};
+use crate::engine::pieces::{self, PieceType};
 
 use crate::error::{Result, Error};
 

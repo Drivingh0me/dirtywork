@@ -5,9 +5,9 @@ mod pieces;
 pub use magic::{initialize_magic, search_magic};
 pub use boards::{BitBoard, BoardState};
 pub use pieces::{PieceType, Color};
-use crate::dw_engine::magic::Magic;
-use crate::dw_engine::pieces::{Moov, MoovList};
-use crate::dw_engine::boards::{Square};
+use crate::engine::magic::Magic;
+use crate::engine::pieces::{Moov, MoovList};
+use crate::engine::boards::{Square};
 
 use crate::error::{Result, Error};
 

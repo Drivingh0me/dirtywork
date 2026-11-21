@@ -1,8 +1,8 @@
 // This is the file for all of the stuff related to pices, like determining
 // moves and stuff.
 
-use crate::dw_engine::boards::*;
-use crate::dw_engine::magic::{self, Magic, get_slider_moveboard, Slider};
+use crate::engine::boards::*;
+use crate::engine::magic::{self, Magic, get_slider_moveboard, Slider};
 
 #[derive(Debug, PartialEq, Default, Clone, Copy)]
 pub enum Color {
