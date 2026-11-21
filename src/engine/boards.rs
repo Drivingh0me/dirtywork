@@ -32,6 +32,16 @@ impl BitBoard {
         Self { bits: val }
     }
 
+    pub fn from_square(sq: Square) -> Self {
+        if sq == Square::none() {
+            return Self::new();
+        }
+
+        let mut bytes: u64 = 0b0000_0001;
+        bytes << sq.bits;
+        Self::set_val(bytes)
+    }
+
     /// Calculates how many pieces there are.
     pub fn how_many(self) -> u32 {
         self.bits.count_ones()
@@ -310,6 +320,10 @@ impl BoardState {
 
     pub(crate) fn set_turn(&mut self, color: Color) {
         self.rights.set_turn(color);
+    }
+
+    pub fn crumb(&self) -> BitBoard {
+        BitBoard::from_square(self.crumb)
     }
 }
 

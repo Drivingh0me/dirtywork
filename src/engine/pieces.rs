@@ -230,8 +230,9 @@ fn get_moveboard(
                 let mut captures = BitBoard::set_val(BP_CAPT[square.index()]);
                 captures.remove(friends);
 
-                // TODO: Add crumb here for en passant.
-                captures.and(foes);
+                let mut crumb: BitBoard = state.crumb();
+                crumb.combine(foes);
+                captures.and(crumb);
 
                 walks.combine(captures);
                 walks
